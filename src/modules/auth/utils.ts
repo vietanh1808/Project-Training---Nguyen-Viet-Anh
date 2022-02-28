@@ -18,7 +18,7 @@ const validatePassword = (password: string) => {
     return 'passwordRequire';
   }
 
-  if (password.length < 4) {
+  if (password.length < 6) {
     return 'minPasswordInvalid';
   }
 
