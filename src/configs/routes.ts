@@ -8,5 +8,6 @@ export const ROUTES = {
   products: '/products',
   detailProduct: '/products/detail-product/:id',
   manageProduct: '/products/manage-product',
-  createProduct: '/products/create-product'
+  createProduct: '/products/create-product',
+  dashboard: '/dashboard'
 };

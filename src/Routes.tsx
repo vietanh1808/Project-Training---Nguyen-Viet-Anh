@@ -9,6 +9,7 @@ const LoginPage = lazy(() => import('./modules/auth/pages/LoginPage'));
 const ProductPage = lazy(() => import('./modules/home/pages/products/ProductPage'));
 const DetailProductPage = lazy(() => import('./modules/home/pages/products/DetailProductPage'));
 const CreateProductPage = lazy(() => import('./modules/home/pages/products/CreateProductPage'));
+const DashboardPage = lazy(() => import('./modules/home/pages/DashboardPage'));
 
 interface Props {}
 
@@ -19,7 +20,8 @@ export const Routes = (props: Props) => {
     <Suspense fallback={<div>Loading.....</div>}>
       <Switch location={location}>
         <Route path={ROUTES.login} component={LoginPage} />
-        <ProtectedRoute path={ROUTES.manageProduct} component={ProductPage} />
+        <ProtectedRoute path={ROUTES.dashboard} component={DashboardPage} />
+        <Route path={ROUTES.manageProduct} component={ProductPage} />
         <Route path={ROUTES.createProduct} component={CreateProductPage} />
         <Route path={ROUTES.detailProduct} component={DetailProductPage} />
         <Route path={ROUTES.home} component={HomePage} />
