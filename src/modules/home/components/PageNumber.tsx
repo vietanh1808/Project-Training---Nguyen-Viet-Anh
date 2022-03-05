@@ -12,9 +12,9 @@ const PageNumber = (props: Props) => {
   const [pages, setPages] = useState<any[]>([]);
 
   useEffect(() => {
-    const a = Array.from({ length: numberPage - 1 }, (_, i) => ++i);
+    const a = Array.from({ length: numberPage }, (_, i) => ++i);
     setPages(a);
-  }, []);
+  }, [numberPage]);
 
   return (
     <>

@@ -48,7 +48,7 @@ const SideBar = (props: Props) => {
   }, [show]);
 
   return (
-    <Container fluid>
+    <>
       <Tab.Container id="left-tabs-example" defaultActiveKey="first">
         <Row>
           <Alert style={{ width: 300 }} show={show}>
@@ -92,7 +92,7 @@ const SideBar = (props: Props) => {
           </Col>
         </Row>
       </Tab.Container>
-    </Container>
+    </>
   );
 };
 

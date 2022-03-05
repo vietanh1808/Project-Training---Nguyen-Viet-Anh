@@ -22,3 +22,21 @@ export interface IProduct {
   participateSale: number,
   condition: string  
 }
+
+export interface ICategory {
+  id: number,
+  parentId: number,
+  name: string,
+  path:string,
+  pos: number
+}
+export interface IFormFilter {
+  keyword: string,
+  category: string,
+  stock: ''|'in'|'low'|'out',
+  name: boolean,
+  sku: boolean,
+  description: boolean,
+  vendor: string,
+  available: ''|'enable'|'disable'
+}
