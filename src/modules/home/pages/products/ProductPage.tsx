@@ -27,8 +27,9 @@ import { Action } from 'typesafe-actions';
 import { fetchThunk } from '../../../common/redux/thunk';
 import { setProductsAction } from '../redux/productReducer';
 import PageNumber from '../../components/PageNumber';
+import { ROUTES } from '../../../../configs/routes';
 
-const numberItem = 3;
+const numberItem = 5;
 const initFilter: IFormFilter = {
   keyword: '',
   category: '',
@@ -44,7 +45,6 @@ const ProductPage = () => {
   const dispatch = useDispatch<ThunkDispatch<AppState, null, Action<string>>>();
   const productsStore = useSelector((state: AppState) => state.products.data);
   const [products, setProducts] = useState<IProduct[]>([]);
-  const [initProducts, setInitProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(-1);
   const [currentItem, setCurrentItem] = useState<IProduct[]>([]);
@@ -52,6 +52,7 @@ const ProductPage = () => {
   const [categorys, setCategorys] = useState<ICategory[]>([]);
   const [direction, setDirection] = useState('ascending');
   const [formFilter, setFormFilter] = useState<IFormFilter>(initFilter);
+  const [listCheckRow, setListCheckRow] = useState<Array<any>>([]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -60,12 +61,20 @@ const ProductPage = () => {
     const cateObject = await dispatch(fetchThunk('https://api.gearfocus.div4.pgtest.co/api/categories/list'));
     setCategorys(cateObject.data);
     const newProducts: IProduct[] = [];
-    const newInitProducts: IProduct[] = [];
-    productObject.data.slice(0, 20).map((p: IProduct) => {
-      newProducts.push({ ...p });
-      newInitProducts.push({ ...p });
+    productObject.data.slice(0, 20).map((p: any) => {
+      newProducts.push({
+        ...p,
+        id: +p.id,
+        price: +p.price,
+        arrivalDate: +p.arrivalDate,
+        enabled: +p.enabled,
+        weight: +p.weight,
+        created: +p.created,
+        vendorID: +p.vendorID,
+        amount: +p.amount,
+        participateSale: +p.participateSale,
+      });
     });
-    setInitProducts(newInitProducts);
     setProducts(newProducts);
     setCurrentPage(0);
     setLoading(false);
@@ -75,6 +84,7 @@ const ProductPage = () => {
     fetchProducts();
   }, []);
 
+  // --------------- Handle Pagination ---------------
   useEffect(() => {
     const item = products.slice(numberItem * currentPage, numberItem * (currentPage + 1));
     setCurrentItem(item);
@@ -85,6 +95,11 @@ const ProductPage = () => {
     const item = products.slice(numberItem * currentPage, numberItem * (currentPage + 1));
     setCurrentItem(item);
     setCurrentPage(0);
+    setListCheckRow(
+      Array.from({ length: products.length }, (_, i) => {
+        return false;
+      }),
+    );
   }, [products]);
 
   const onClickPage = (index?: number | null) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -102,6 +117,7 @@ const ProductPage = () => {
         return;
     }
   };
+  // --------------- End of Handle Pagination ---------------
 
   const handleChangeForm = (e: any) => {
     switch (e.currentTarget.id) {
@@ -154,9 +170,9 @@ const ProductPage = () => {
       if (formFilter.available) {
         // Search By Availability Select
         if (!filter) filter = true;
-        if (product.enable === 1 && 'enable' === formFilter.available) {
+        if (product.enabled === 1 && 'enable' === formFilter.available) {
           filter = filter && true;
-        } else if (product.enable === 0 && 'disable' === formFilter.available) {
+        } else if (product.enabled === 0 && 'disable' === formFilter.available) {
           filter = filter && true;
         } else {
           filter = false;
@@ -272,9 +288,57 @@ const ProductPage = () => {
     }
   };
 
+  const handleClickRow = (index: number) => (e: any) => {
+    let cloneArray: any = [];
+    if (index) {
+      index = index + currentPage * numberItem;
+    }
+    switch (e.currentTarget.id) {
+      case 'rowCheckbox':
+        if (e.target.checked) {
+          cloneArray = [...listCheckRow];
+          cloneArray.splice(index, 1, true);
+          setListCheckRow(cloneArray);
+        } else {
+          cloneArray = [...listCheckRow];
+          cloneArray.splice(index, 1, false);
+          setListCheckRow(cloneArray);
+        }
+        break;
+      case 'rowEnableIcon':
+        setLoading(true);
+        cloneArray = [...products];
+        cloneArray.splice(index, 1, { ...cloneArray[index], enabled: 1 - cloneArray[index]['enabled'] });
+        setProducts(cloneArray);
+        dispatch(setProductsAction(cloneArray));
+        setLoading(false);
+        break;
+      case 'rowDeleteButton':
+        cloneArray = products.filter((p: any, index: number) => {
+          return !listCheckRow[index];
+        });
+
+        setProducts(cloneArray);
+        dispatch(setProductsAction(cloneArray));
+        break;
+      case 'rowCheckAllCheckbox':
+        e.target.checked
+          ? setListCheckRow(
+              Array.from({ length: products.length }, (_, i) => {
+                return true;
+              }),
+            )
+          : setListCheckRow(
+              Array.from({ length: products.length }, (_, i) => {
+                return false;
+              }),
+            );
+        break;
+    }
+  };
   // --------------------- FORM TABLE PRODUCT ---------------------
   return (
-    <div style={{ padding: 10 }}>
+    <div style={{ padding: 10, marginBottom: 30 }}>
       {loading ? (
         <Spinner
           className="d-flex justify-content-center align-items-center align-self-center"
@@ -287,11 +351,11 @@ const ProductPage = () => {
         <>
           <FormFilter onSearch={handleSearch} categorys={categorys} onChangeItem={handleChangeForm} />
           <Button className=" mt-3 mb-3">Add Product</Button>
-          <Table style={{}} className="table table-striped table-hover table-sm text-nowrap">
+          <table className="table table-hover table-sm text-nowrap">
             <thead>
               <tr>
                 <th>
-                  <Form.Check type={'checkbox'} />
+                  <Form.Check type={'checkbox'} id="rowCheckAllCheckbox" onClick={handleClickRow(-1)} />
                 </th>
                 <th onClick={handleClickThead}>SKU</th>
                 <th onClick={handleClickThead}>Name</th>
@@ -304,47 +368,60 @@ const ProductPage = () => {
             </thead>
             <tbody>
               {currentItem.map((product, index) => (
-                <tr key={index}>
-                  <td>
-                    <Form.Check type={'checkbox'}>
-                      <Form.Check.Input type={'checkbox'} />
-                      <Form.Check.Label>
-                        | <BsPower color={product.enable === 1 ? '#72b25b' : ''} /> |
-                      </Form.Check.Label>
-                    </Form.Check>
-                  </td>
-                  <td>{product.sku}</td>
-                  <td>
-                    <div className="col-10 text-truncate">{product.name}</div>
-                  </td>
-                  <td>{product.category}</td>
-                  <td>{formatterPrice.format(+product.price)}</td>
-                  <td>{product.amount}</td>
-                  <td>
-                    <div className="col-4 text-truncate">{product.vendor}</div>
-                  </td>
-                  <td>{moment(+product.arrivalDate).format('MMM Do, YYYY')}</td>
-                  <td>
-                    <Button>
-                      <MdDelete />
-                    </Button>
-                  </td>
-                </tr>
+                <>
+                  <tr key={product.id}>
+                    <td>
+                      <Form.Check type={'checkbox'}>
+                        <Form.Check.Input
+                          id="rowCheckbox"
+                          type={'checkbox'}
+                          onChange={handleClickRow(index)}
+                          checked={listCheckRow[index + numberItem * currentPage]}
+                        />
+                        <Form.Check.Label>
+                          |{' '}
+                          <a id="rowEnableIcon" href="#" onClick={handleClickRow(index)}>
+                            <BsPower color={product.enabled === 1 ? '#72b25b' : ''} />
+                          </a>{' '}
+                          |
+                        </Form.Check.Label>
+                      </Form.Check>
+                    </td>
+                    <td>{product.sku}</td>
+                    <td>
+                      <div className="col-10 text-truncate">
+                        <a href={ROUTES.detailProduct + `/${product.id}`}>{product.name}</a>
+                      </div>
+                    </td>
+                    <td>{product.category}</td>
+                    <td>{formatterPrice.format(+product.price)}</td>
+                    <td>{product.amount}</td>
+                    <td>
+                      <div className="col-7 text-truncate">{product.vendor}</div>
+                    </td>
+                    <td>{moment(+product.arrivalDate).format('MMM Do, YYYY')}</td>
+                    <td>
+                      <Button id="rowDeleteButton" onClick={handleClickRow(index)}>
+                        <MdDelete />
+                      </Button>
+                    </td>
+                  </tr>
+                </>
               ))}
             </tbody>
-          </Table>
+          </table>
 
           <PageNumber numberPage={numberPage} currentPage={currentPage} onClickPage={onClickPage} />
-          {/* <Navbar fixed="bottom" bg="dark" className="shadow-lg d-block p-3 mb-3 bg-dark rounded">
-            <Row>
-              <Col>
-                <Button style={{ marginLeft: 20 }}>Save Changes</Button>
-                <Button style={{ marginLeft: 10 }}>Export all: CSV</Button>
-              </Col>
-            </Row>
-          </Navbar> */}
         </>
       )}
+      <nav className="navbar fixed-bottom shadow" style={{ backgroundColor: '#323259' }}>
+        <Row>
+          <Col>
+            <Button style={{ marginLeft: 20, backgroundColor: '#f0ad4e', border: '#f0ad4e' }}>Save Changes</Button>
+            <Button style={{ marginLeft: 10, backgroundColor: '#f0ad4e', border: '#f0ad4e' }}>Export all: CSV</Button>
+          </Col>
+        </Row>
+      </nav>
     </div>
   );
 };

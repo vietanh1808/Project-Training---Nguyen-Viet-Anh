@@ -23,12 +23,12 @@ const PageNumber = (props: Props) => {
         {numberPage < 5 ? (
           pages.map((page, index) => (
             <Pagination.Item
-              onClick={onClickPage(page)}
-              activeLabel={page + ''}
-              active={page === currentPage}
-              key={page}
+              onClick={onClickPage(page - 1)}
+              activeLabel={page - 1 + ''}
+              active={page - 1 === currentPage}
+              key={page - 1}
             >
-              {page + 1}
+              {page}
             </Pagination.Item>
           ))
         ) : (

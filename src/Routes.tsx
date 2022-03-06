@@ -23,7 +23,7 @@ export const Routes = (props: Props) => {
         <ProtectedRoute path={ROUTES.dashboard} component={DashboardPage} />
         <Route path={ROUTES.manageProduct} component={ProductPage} />
         <Route path={ROUTES.createProduct} component={CreateProductPage} />
-        <Route path={ROUTES.detailProduct} component={DetailProductPage} />
+        <Route path={ROUTES.detailProduct + '/:id'} component={DetailProductPage} />
         <Route path={ROUTES.home} component={HomePage} />
         <Route path={ROUTES.contact} component={ContactPage} />
 

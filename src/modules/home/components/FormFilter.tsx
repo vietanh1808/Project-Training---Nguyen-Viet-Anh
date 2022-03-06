@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Collapse } from 'react-bootstrap';
-import { BsPower } from 'react-icons/bs';
+import { BsPower, BsArrowDown, BsArrowUp } from 'react-icons/bs';
 import { AiOutlineRotateRight, AiOutlineSmallDash } from 'react-icons/ai';
 import { ICategory } from '../utils';
 
@@ -47,7 +47,9 @@ const FormFilter = (props: Props) => {
             </Button>
           </Col>
         </Row>
-        <Button onClick={handleExpand}>Expand</Button>
+        <Button onClick={handleExpand}>
+          {expand ? 'Collapse' : 'Expand'} {expand ? <BsArrowUp /> : <BsArrowDown />}
+        </Button>
         <Collapse in={expand}>
           <Row>
             <Col as={Row} sm={3} className="m-2">

@@ -6,6 +6,7 @@ import {
   Alert,
   Card,
   Col,
+  Collapse,
   Container,
   Nav,
   Offcanvas,
@@ -27,17 +28,6 @@ interface CustomeProps {
   eventKey: any;
 }
 
-function CustomToggle({ children, eventKey }: CustomeProps) {
-  const decoratedOnClick = useAccordionButton(eventKey, () => console.log('totally custom!'));
-  const { activeEventKey } = React.useContext(AccordionContext);
-
-  return (
-    <div style={{ color: activeEventKey === eventKey ? 'purple' : 'black' }} onClick={decoratedOnClick}>
-      {children}
-    </div>
-  );
-}
-
 const SideBar = (props: Props) => {
   const [active, setActive] = useState(false);
 
@@ -51,8 +41,8 @@ const SideBar = (props: Props) => {
     <>
       <Tab.Container id="left-tabs-example" defaultActiveKey="first">
         <Row>
-          <Alert style={{ width: 300 }} show={show}>
-            <Col className="sidebar-sticky">
+          <Col sm={show ? 3 : 1}>
+            <Collapse in={show}>
               <Accordion defaultActiveKey="0" flush>
                 <Nav variant="pills" className="flex-column">
                   <Nav.Item>
@@ -78,8 +68,8 @@ const SideBar = (props: Props) => {
                   </Nav.Item>
                 </Nav>
               </Accordion>
-            </Col>
-          </Alert>
+            </Collapse>
+          </Col>
           <Col>
             <Tab.Content>
               <Tab.Pane eventKey="first">

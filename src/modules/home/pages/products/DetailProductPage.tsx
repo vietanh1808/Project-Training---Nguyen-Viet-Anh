@@ -1,7 +1,10 @@
 import React from 'react';
+import { useParams } from 'react-router';
 
 const DetailProductPage = () => {
-  return <div>DetailProductPage</div>;
+  const params: any = useParams();
+
+  return <div>DetailProductPage {params['id']}</div>;
 };
 
 export default DetailProductPage;
