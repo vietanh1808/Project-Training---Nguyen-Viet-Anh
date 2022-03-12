@@ -13,6 +13,7 @@ export function fetchThunk(
   contentType?: string,
 ): ThunkAction<Promise<any>, AppState, null, Action<string>> {
   return async (dispatch, getState) => {
+
     const res = await fetch(url, {
       credentials: 'include',
       method,
@@ -23,7 +24,9 @@ export function fetchThunk(
               'Content-Type': contentType || 'application/json',
               Authorization: Cookies.get(ACCESS_TOKEN_KEY) || '',
             }
-          : {},
+          : {
+            Authorization: Cookies.get(ACCESS_TOKEN_KEY) || ''
+          },
       cache: 'no-store',
     });
 

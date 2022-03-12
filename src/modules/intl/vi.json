@@ -7,5 +7,6 @@
   "emailInvalid": "Địa chỉ email không hợp lệ",
   "passwordRequire": "Vui lòng nhập mật khẩu",
   "minPasswordInvalid": "Mật khẩu tối thiểu 6 ký tự",
-  "register": "Đăng nhập"
+  "register": "Đăng nhập",
+  "Invalid email or password.": "Tài khoản hoặc mật khẩu không đúng."
 }

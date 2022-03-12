@@ -20,11 +20,10 @@ function App() {
 
   const getProfile = React.useCallback(async () => {
     const accessToken = Cookies.get(ACCESS_TOKEN_KEY);
-
     if (accessToken && !user) {
       const json = await dispatch(fetchThunk(API_PATHS.userProfile));
-      if (json?.code === RESPONSE_STATUS_SUCCESS) {
-        dispatch(setUserInfo({ ...json.data, token: accessToken }));
+      if (json?.success) {
+        dispatch(setUserInfo({ ...json.user, user_cookie: accessToken }));
       }
     }
   }, [dispatch, user]);

@@ -61,7 +61,7 @@ const ProductPage = () => {
     const cateObject = await dispatch(fetchThunk('https://api.gearfocus.div4.pgtest.co/api/categories/list'));
     setCategorys(cateObject.data);
     const newProducts: IProduct[] = [];
-    productObject.data.slice(0, 20).map((p: any) => {
+    productObject.data.map((p: any) => {
       newProducts.push({
         ...p,
         id: +p.id,
@@ -160,12 +160,12 @@ const ProductPage = () => {
         newP = { ...p };
         cloneProducts.push(newP);
       });
-      setProducts(cloneProducts.slice(0, 20));
+      setProducts(cloneProducts);
       setLoading(false);
       return;
     }
     let filter = null;
-    const filterItem = productsStore.slice(0, 20).filter((product, index) => {
+    const filterItem = productsStore.filter((product, index) => {
       filter = null;
       if (formFilter.available) {
         // Search By Availability Select

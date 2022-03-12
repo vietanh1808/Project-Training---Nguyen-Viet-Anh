@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import SideBar from '../components/SideBar';
+import '../scss/dashboard.css';
 
 const Dashboard = () => {
   const [showSideBar, setShowSideBar] = useState(false);
