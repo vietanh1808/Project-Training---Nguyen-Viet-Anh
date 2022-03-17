@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Collapse } from 'react-bootstrap';
 import { BsPower, BsArrowDown, BsArrowUp } from 'react-icons/bs';
 import { AiOutlineRotateRight, AiOutlineSmallDash } from 'react-icons/ai';
-import { ICategory } from '../utils';
+import { ICategory } from '../../../models/product';
 
 interface Props {
   categorys: ICategory[];

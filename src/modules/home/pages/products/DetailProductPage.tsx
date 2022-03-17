@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie';
 import React, { useState, useEffect } from 'react';
 import { Spinner } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,10 +6,17 @@ import { Action } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { API_PATHS } from '../../../../configs/api';
 import { AppState } from '../../../../redux/reducer';
-import { ACCESS_TOKEN_KEY } from '../../../../utils/constants';
 import { fetchThunk } from '../../../common/redux/thunk';
 import DetailProductForm from '../../components/DetailProductForm';
-import { IBrand, ICategory, ICondition, IProduct, IProductDetail, IVendor } from '../../utils';
+import {
+  IBrand,
+  ICategory,
+  ICondition,
+  IProduct,
+  IProductDetail,
+  IVendor,
+  IShipping,
+} from '../../../../models/product';
 
 const DetailProductPage = () => {
   const dispatch = useDispatch<ThunkDispatch<AppState, null, Action<string>>>();
@@ -20,8 +26,9 @@ const DetailProductPage = () => {
   const [brands, setBrands] = useState<IBrand[]>([]);
   const [conditions, setConditions] = useState<ICondition[]>([]);
   const [categorys, setCategorys] = useState<ICategory[]>([]);
-  const [vendors, setVendors] = useState<IVendor[] | any[]>([]);
+  const [vendors, setVendors] = useState<IVendor[]>([]);
   const [loading, setLoading] = useState(false);
+  const [shipping, setShipping] = useState<IShipping[]>([]);
 
   const fetchBrand = async () => {
     setLoading(true);
@@ -68,22 +75,33 @@ const DetailProductPage = () => {
     setLoading(true);
     const dataObject = await dispatch(fetchThunk(API_PATHS.productDetail, 'post', { id: params.id }));
     setProduct(dataObject.data);
-    console.log(dataObject);
     setLoading(false);
   };
 
+  const fetchShipping = async () => {
+    setLoading(true);
+    const dataObject = await dispatch(fetchThunk(API_PATHS.shippingList, 'post'));
+    setShipping(dataObject.data);
+    setLoading(false);
+  };
+
+  const handleSubmit = () => {
+    // fetch to Update here
+    console.log("Update Product!")
+  }
+
   useEffect(() => {
+    fetchCategory();
+    fetchVendor();
     fetchDetail();
     fetchBrand();
     fetchCondition();
-    fetchCategory();
-    fetchVendor();
+    fetchShipping();
   }, []);
-
   return (
-    <div className="d-flex justify-content-center">
+    <div className="">
       {loading ? (
-        <Spinner className="" animation="border" role="status">
+        <Spinner className="d-flex justify-content-center" animation="border" role="status">
           <span className="visually-hidden">Loading...</span>
         </Spinner>
       ) : (
@@ -93,7 +111,9 @@ const DetailProductPage = () => {
           brands={brands}
           vendors={vendors}
           product={product}
+          shippings={shipping}
           onLoading={loading}
+          onSubmit={handleSubmit}
         />
       )}
     </div>

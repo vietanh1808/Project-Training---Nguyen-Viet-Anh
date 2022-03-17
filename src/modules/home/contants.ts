@@ -1,1 +1,25 @@
-export const fileTypes = ["JPEG", "PNG", "GIF"];
+export const fileTypes = ['JPEG', 'PNG', 'GIF'];
+export const titleString = {
+  vendor: 'Vendor',
+  name: 'Product Title',
+  brand: 'Brand',
+  condition: 'Condition',
+  sku: 'SKU',
+  images: 'Images',
+  category: 'Category',
+  description: 'Description',
+  enable: 'Available for sale',
+  memberships: 'Memberships',
+  tax: 'Tax class',
+  price: 'Price',
+  sale: 'Sale',
+  arrivalDate: 'Arrival Date',
+  quantity: 'Quantity in stock',
+  zones: 'Continental U.S',
+  metaTag: 'Open Graph meta tags',
+  metaDescription: 'Meta description',
+  metaKeywords: 'Meta keywords',
+  pageTitle: 'Product page title',
+  facebookMkt: 'Add to Facebook product feed',
+  googleMkt: 'Add to Google product feed',
+};

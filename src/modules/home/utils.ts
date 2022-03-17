@@ -1,98 +1,101 @@
+import { IProductUpdate, IProductValidation } from '../../models/product';
+
 export const formatterPrice = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
   minimumFractionDigits: 2,
 });
 
-export interface IProduct {
-  id: number;
-  sku: string;
-  name: string;
-  category: string;
-  price: number;
-  vendor: string;
-  arrivalDate: number;
-  enabled: number;
-  weight: number;
-  description: string;
-  created: number;
-  vendorID: number;
-  amount: number;
-  participateSale: number;
-  condition: string;
-}
+export const formatterTime = (value?: number | string) => {
+  if (typeof value === 'number') {
+    const a = new Date(value);
+    const year = a.getFullYear();
+    const month = a.getMonth() + 1;
+    const date = a.getDate();
 
-export interface ICategory {
-  id: number;
-  parentId: number;
-  name: string;
-  path: string;
-  pos: number;
-}
-export interface IFormFilter {
-  keyword: string;
-  category: string;
-  stock: '' | 'in' | 'low' | 'out';
-  name: boolean;
-  sku: boolean;
-  description: boolean;
-  vendor: string;
-  available: '' | 'enable' | 'disable';
-}
+    return year + '-' + (month < 10 ? '0' + month : month) + '-' + (date < 10 ? '0' + date : date);
+  }
 
-export interface IBrand {
-  id: number;
-  name: string;
-  image: string;
-  description: string;
-}
+  return '';
+};
 
-export interface ICondition {
-  id: number | null;
-  name: string;
-}
+const validStringFiled = (name: string, value: string) => {
+  if (value) {
+    return '';
+  }
+  switch (name) {
+    case 'vendor':
+      return 'vendorRequire';
+    case 'name':
+      return 'nameRequire';
+    default:
+      return '';
+  }
+};
 
-export interface IProductDetail {
-  id: number;
-  vendor_id: number;
-  name: string;
-  sku: string;
-  sort_description: string;
-  description: string;
-  enabled: number;
-  quantity: number;
-  price: number;
-  participate_sale: number;
-  sale_price: number;
-  tax_exempt: number;
-  arrival_date: number;
-  facebook_marketing_enabled: number;
-  google_feed_enabled: number;
-  og_tags_type: number;
-  meta_desc_type: string;
-  meta_keywords: string;
-  meta_description: string;
-  product_page_title: string;
-  code: string;
-  weight: number;
-  inventory_tracking: number;
-  og_tags: string;
-  sale_price_type: string;
-  cleanURL: string;
-  brand_id: number;
-  shipping: Array<any>;
-  categories: Array<{ category_id: number; name: string }>;
-  images: Array<{
-    id: number;
-    file: string;
-    thumbs: Array<string>;
-  }>;
-  memberships: Array<any>;
-}
+const validArrayField = (name: string, value: any[]) => {
+  if (value.length) {
+    return '';
+  }
+  switch (name) {
+    case 'images':
+      return 'imagesRequire';
+    case 'categories':
+      return 'categoriesRequire';
+    case 'shipping':
+      return 'shippingRequire';
+    default:
+      return '';
+  }
+};
 
-export interface IVendor {
-  id: number;
-  companyName?: null | string;
-  login?: string;
-  name: string;
-}
+const validNumberFiled = (name: string, value: number) => {
+  if (value) {
+    return '';
+  }
+  switch (name) {
+    case 'price':
+      return 'priceRequire';
+    case 'quantity':
+      return 'quantityRequire';
+    case 'vendor':
+      return 'quantityRequire';
+    case 'brand':
+      return 'quantityRequire';
+    case 'condition':
+      return 'conditionRequire';
+    default:
+      return '';
+  }
+};
+
+export const validateProduct = (product?: IProductUpdate): IProductValidation => {
+  return {
+    vendor_id: validNumberFiled('vendor', product?.vendor_id || 0),
+    brand_id: validNumberFiled('brand', product?.brand_id || 0),
+    quantity: validNumberFiled('quantity', product?.quantity || 0),
+    price: validNumberFiled('price', product?.price || 0),
+    condition_id: validNumberFiled('conditon', product?.condition_id || 0),
+    name: validStringFiled('name', product?.name || ''),
+    description: validStringFiled('description', product?.description || ''),
+    imagesOrder: validArrayField('images', product?.imagesOrder || []),
+    categories: validArrayField('catgories', product?.categories || []),
+    shipping_to_zones: validArrayField('shipping', product?.shipping_to_zones || []),
+  };
+};
+
+export const validSubmitUpdate = (values: IProductValidation) => {
+  console.log(values);
+  return (
+    !values.vendor_id &&
+    !values.name &&
+    !values.brand_id &&
+    !values.condition_id &&
+    !values.imagesOrder &&
+    !values.categories &&
+    !values.quantity &&
+    !values.shipping_to_zones &&
+    !values.price &&
+    !values.description
+  );
+};

@@ -18,7 +18,7 @@ import { AiOutlineRotateRight, AiOutlineSmallDash } from 'react-icons/ai';
 import FormFilter from '../../components/FormFilter';
 import { MdDelete } from 'react-icons/md';
 import '../../scss/products.css';
-import { formatterPrice, ICategory, IFormFilter, IProduct } from '../../utils';
+import { ICategory, IFormFilter, IProduct } from '../../../../models/product';
 import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -28,6 +28,8 @@ import { fetchThunk } from '../../../common/redux/thunk';
 import { setProductsAction } from '../redux/productReducer';
 import PageNumber from '../../components/PageNumber';
 import { ROUTES } from '../../../../configs/routes';
+import { formatterPrice } from '../../utils';
+import { API_PATHS } from '../../../../configs/api';
 
 const numberItem = 5;
 const initFilter: IFormFilter = {
@@ -149,6 +151,8 @@ const ProductPage = () => {
         break;
     }
   };
+
+  const onAddProduct = () => {};
 
   const handleSearch = (e: any) => {
     e.preventDefault();
@@ -350,7 +354,9 @@ const ProductPage = () => {
       ) : (
         <>
           <FormFilter onSearch={handleSearch} categorys={categorys} onChangeItem={handleChangeForm} />
-          <Button className=" mt-3 mb-3">Add Product</Button>
+          <Button href={ROUTES.createProduct} onClick={onAddProduct} className=" mt-3 mb-3">
+            Add Product
+          </Button>
           <table className="table table-hover table-sm text-nowrap">
             <thead>
               <tr>
@@ -414,7 +420,7 @@ const ProductPage = () => {
           <PageNumber numberPage={numberPage} currentPage={currentPage} onClickPage={onClickPage} />
         </>
       )}
-      <nav className="navbar fixed-bottom shadow" style={{ backgroundColor: '#323259' }}>
+      <nav className="navbar fixed-bottom " style={{ backgroundColor: '#323259', boxShadow: '0 0 13 0 #b18aff' }}>
         <Row>
           <Col>
             <Button style={{ marginLeft: 20, backgroundColor: '#f0ad4e', border: '#f0ad4e' }}>Save Changes</Button>

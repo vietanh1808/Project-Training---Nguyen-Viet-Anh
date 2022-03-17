@@ -1,5 +1,5 @@
 import { ActionType, createCustomAction, getType } from 'typesafe-actions';
-import { IProduct } from '../../utils';
+import { IProduct } from '../../../../models/product';
 
 export interface ProductState {
   data: IProduct[];
