@@ -12,7 +12,7 @@ import {
   IShipping,
   IVendor,
 } from '../../../models/product';
-import { formatterTime, formatterPrice, validateProduct, validSubmitUpdate } from '../utils';
+import { formatterDate, formatterPrice, validateProduct, validSubmitUpdate } from '../utils';
 import { BsFillCameraFill, BsXCircleFill, BsFillCalendarFill } from 'react-icons/bs';
 import ImageUploading, { ImageListType } from 'react-images-uploading';
 import Select from 'react-select';
@@ -569,7 +569,7 @@ const DetailProductForm = (props: Props) => {
                           if (formValue)
                             setFormValue({ ...formValue, arrival_date: new Date(e.currentTarget.value).getTime() });
                         }}
-                        value={formatterTime(formValue?.arrival_date) || ''}
+                        value={formatterDate(formValue?.arrival_date) || ''}
                       />
                     </InputGroup>
                     {!!validate.arrival_date && (

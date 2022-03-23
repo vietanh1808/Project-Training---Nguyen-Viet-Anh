@@ -23,3 +23,39 @@ export const titleString = {
   facebookMkt: 'Add to Facebook product feed',
   googleMkt: 'Add to Google product feed',
 };
+
+export const titleTable = {
+  email: 'Login/Email',
+  name: 'Name',
+  accessLevel: 'Access Level',
+  product: 'Products',
+  orders: 'Orders',
+  wishlist: 'Wishlist',
+  created: 'Created',
+  lastLogin: 'Last Login',
+};
+
+export const idSearchForm = {
+  keywords: 'searchKeywords',
+  membership: 'selectMemberships',
+  userType: 'selectUserType',
+  status: 'selectStatus',
+  country: 'selectCountry',
+  state: 'inputState',
+  address: 'inputAddress',
+  phone: 'inputPhone',
+  userActivity: { radio: 'radioUserActivity', date: 'inputUserActivity' },
+};
+
+export const idFieldFormUser = {
+  fistName: 'inputFirstName',
+  lastName: 'inputLastName',
+  email: 'inputEmail',
+  password: 'inputPassword',
+  confirmPassword: 'inputConfirmPassword',
+  status: 'selectStatus',
+  comment: 'inputStatusComment',
+  membership: 'selectMembership',
+  requirePassword: 'checkRequirePassword',
+  taxExempt: 'checkTax',
+};

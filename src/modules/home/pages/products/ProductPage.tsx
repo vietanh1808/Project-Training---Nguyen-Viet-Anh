@@ -374,45 +374,43 @@ const ProductPage = () => {
             </thead>
             <tbody>
               {currentItem.map((product, index) => (
-                <>
-                  <tr key={product.id}>
-                    <td>
-                      <Form.Check type={'checkbox'}>
-                        <Form.Check.Input
-                          id="rowCheckbox"
-                          type={'checkbox'}
-                          onChange={handleClickRow(index)}
-                          checked={listCheckRow[index + numberItem * currentPage]}
-                        />
-                        <Form.Check.Label>
-                          |{' '}
-                          <a id="rowEnableIcon" href="#" onClick={handleClickRow(index)}>
-                            <BsPower color={product.enabled === 1 ? '#72b25b' : ''} />
-                          </a>{' '}
-                          |
-                        </Form.Check.Label>
-                      </Form.Check>
-                    </td>
-                    <td>{product.sku}</td>
-                    <td>
-                      <div className="col-10 text-truncate">
-                        <a href={ROUTES.detailProduct + `/${product.id}`}>{product.name}</a>
-                      </div>
-                    </td>
-                    <td>{product.category}</td>
-                    <td>{formatterPrice.format(+product.price)}</td>
-                    <td>{product.amount}</td>
-                    <td>
-                      <div className="col-7 text-truncate">{product.vendor}</div>
-                    </td>
-                    <td>{moment(+product.arrivalDate).format('MMM Do, YYYY')}</td>
-                    <td>
-                      <Button id="rowDeleteButton" onClick={handleClickRow(index)}>
-                        <MdDelete />
-                      </Button>
-                    </td>
-                  </tr>
-                </>
+                <tr key={product.id}>
+                  <td>
+                    <Form.Check type={'checkbox'}>
+                      <Form.Check.Input
+                        id="rowCheckbox"
+                        type={'checkbox'}
+                        onChange={handleClickRow(index)}
+                        checked={listCheckRow[index + numberItem * currentPage]}
+                      />
+                      <Form.Check.Label>
+                        |{' '}
+                        <a id="rowEnableIcon" href="#" onClick={handleClickRow(index)}>
+                          <BsPower color={product.enabled === 1 ? '#72b25b' : ''} />
+                        </a>{' '}
+                        |
+                      </Form.Check.Label>
+                    </Form.Check>
+                  </td>
+                  <td>{product.sku}</td>
+                  <td>
+                    <div className="col-10 text-truncate">
+                      <a href={ROUTES.detailProduct + `/${product.id}`}>{product.name}</a>
+                    </div>
+                  </td>
+                  <td>{product.category}</td>
+                  <td>{formatterPrice.format(+product.price)}</td>
+                  <td>{product.amount}</td>
+                  <td>
+                    <div className="col-7 text-truncate">{product.vendor}</div>
+                  </td>
+                  <td>{moment(+product.arrivalDate).format('MMM Do, YYYY')}</td>
+                  <td>
+                    <Button id="rowDeleteButton" onClick={handleClickRow(index)}>
+                      <MdDelete />
+                    </Button>
+                  </td>
+                </tr>
               ))}
             </tbody>
           </table>

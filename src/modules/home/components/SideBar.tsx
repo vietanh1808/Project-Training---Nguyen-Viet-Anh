@@ -39,7 +39,7 @@ const SideBar = (props: Props) => {
 
   return (
     <>
-      <Tab.Container id="left-tabs-example" defaultActiveKey="first">
+      <Tab.Container id="left-tabs-example" defaultActiveKey="second">
         <Row>
           <Col sm={show ? 3 : 1}>
             <Collapse in={show}>

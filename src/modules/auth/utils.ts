@@ -1,7 +1,7 @@
 import { ILoginParams, ILoginValidation } from '../../models/auth';
 import { validEmailRegex } from '../../utils';
 
-const validateEmail = (email: string) => {
+export const validateEmail = (email: string) => {
   if (!email) {
     return 'emailRequire';
   }
@@ -13,7 +13,7 @@ const validateEmail = (email: string) => {
   return '';
 };
 
-const validatePassword = (password: string) => {
+export const validatePassword = (password: string) => {
   if (!password) {
     return 'passwordRequire';
   }

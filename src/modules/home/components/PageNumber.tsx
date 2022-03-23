@@ -43,16 +43,14 @@ const PageNumber = (props: Props) => {
                     <Pagination.Ellipsis />
                     {pages.slice(currentPage - 1, currentPage + 1).map((page, index) => {
                       return (
-                        <>
-                          <Pagination.Item
-                            onClick={onClickPage(page)}
-                            activeLabel={page + ''}
-                            active={page === currentPage}
-                            key={page}
-                          >
-                            {page + 1}
-                          </Pagination.Item>
-                        </>
+                        <Pagination.Item
+                          onClick={onClickPage(page)}
+                          activeLabel={page + ''}
+                          active={page === currentPage}
+                          key={page}
+                        >
+                          {page + 1}
+                        </Pagination.Item>
                       );
                     })}
                     <Pagination.Ellipsis />
@@ -62,16 +60,14 @@ const PageNumber = (props: Props) => {
                     <Pagination.Ellipsis />
                     {pages.slice(currentPage - 3, currentPage).map((page, index) => {
                       return (
-                        <>
-                          <Pagination.Item
-                            onClick={onClickPage(page)}
-                            activeLabel={page + ''}
-                            active={page === currentPage}
-                            key={page}
-                          >
-                            {page + 1}
-                          </Pagination.Item>
-                        </>
+                        <Pagination.Item
+                          onClick={onClickPage(page)}
+                          activeLabel={page + ''}
+                          active={page === currentPage}
+                          key={page}
+                        >
+                          {page + 1}
+                        </Pagination.Item>
                       );
                     })}
                   </>
@@ -81,16 +77,14 @@ const PageNumber = (props: Props) => {
               <>
                 {pages.slice(0, 3).map((page, index) => {
                   return (
-                    <>
-                      <Pagination.Item
-                        onClick={onClickPage(page)}
-                        activeLabel={page + ''}
-                        active={page === currentPage}
-                        key={page}
-                      >
-                        {page + 1}
-                      </Pagination.Item>
-                    </>
+                    <Pagination.Item
+                      onClick={onClickPage(page)}
+                      activeLabel={page + ''}
+                      active={page === currentPage}
+                      key={page}
+                    >
+                      {page + 1}
+                    </Pagination.Item>
                   );
                 })}
                 <Pagination.Ellipsis />

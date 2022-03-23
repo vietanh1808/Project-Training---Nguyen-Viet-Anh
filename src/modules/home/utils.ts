@@ -1,4 +1,7 @@
 import { IProductUpdate, IProductValidation } from '../../models/product';
+import { IFormAddUser, IFormUpdateUser, IFormUserValidate, IUsersParams } from '../../models/userData';
+import { validEmailRegex } from '../../utils';
+import { validateEmail, validatePassword } from '../auth/utils';
 
 export const formatterPrice = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -6,7 +9,7 @@ export const formatterPrice = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 2,
 });
 
-export const formatterTime = (value?: number | string) => {
+export const formatterDate = (value?: number | string) => {
   if (typeof value === 'number') {
     const a = new Date(value);
     const year = a.getFullYear();
@@ -19,7 +22,7 @@ export const formatterTime = (value?: number | string) => {
   return '';
 };
 
-const validStringFiled = (name: string, value: string) => {
+const validStringFiled = (name: string, value?: string) => {
   if (value) {
     return '';
   }
@@ -28,6 +31,14 @@ const validStringFiled = (name: string, value: string) => {
       return 'vendorRequire';
     case 'name':
       return 'nameRequire';
+    case 'firstName':
+      return 'fisrtNameRequire';
+    case 'lastName':
+      return 'lastNameRequire';
+    case 'accessLevel':
+      return 'accessLevelRequire';
+    case 'paymentType':
+      return 'paymentTypeRequire';
     default:
       return '';
   }
@@ -69,6 +80,11 @@ const validNumberFiled = (name: string, value: number) => {
   }
 };
 
+const validateConfirmPassword = (pass: string, rePass: string) => {
+  if (pass === rePass) return '';
+  return 'rePasswordRequire';
+};
+
 export const validateProduct = (product?: IProductUpdate): IProductValidation => {
   return {
     vendor_id: validNumberFiled('vendor', product?.vendor_id || 0),
@@ -85,7 +101,6 @@ export const validateProduct = (product?: IProductUpdate): IProductValidation =>
 };
 
 export const validSubmitUpdate = (values: IProductValidation) => {
-  console.log(values);
   return (
     !values.vendor_id &&
     !values.name &&
@@ -98,4 +113,48 @@ export const validSubmitUpdate = (values: IProductValidation) => {
     !values.price &&
     !values.description
   );
+};
+
+export const validateVendor = (user: IFormUpdateUser): IFormUserValidate => {
+  return {
+    email: validateEmail(user.email),
+    firstName: validStringFiled('firstName', user.firstName),
+    lastName: validStringFiled('lastName', user.lastName),
+    password: user.password.length ? validatePassword(user.password) : '',
+    confirm_password: validateConfirmPassword(user.password, user.confirm_password),
+    membership_id: '',
+    forceChangePassword: '',
+    taxExempt: '',
+    id: '',
+    roles: '',
+    status: '',
+    statusComment: '',
+    paymentRailsType: validStringFiled('paymentType', user.paymentRailsType),
+  };
+};
+
+export const validateAddVendor = (user: IFormUpdateUser): IFormUserValidate => {
+  return {
+    email: validateEmail(user.email),
+    firstName: validStringFiled('firstName', user.firstName),
+    lastName: validStringFiled('lastName', user.lastName),
+    password: validatePassword(user.password),
+    confirm_password: validateConfirmPassword(user.password, user.confirm_password),
+    membership_id: '',
+    forceChangePassword: '',
+    taxExempt: '',
+    id: '',
+    roles: '',
+    status: '',
+    statusComment: '',
+    paymentRailsType: validStringFiled('paymentType', user.paymentRailsType),
+  };
+};
+
+export const validSubmitUpdateUser = (values: IFormUserValidate) => {
+  return !values.email && !values.firstName && !values.lastName && !values.password && !values.confirm_password;
+};
+
+export const validSubmitAddUser = (values: any) => {
+  return !values.email && !values.firstName && !values.lastName && !values.password && !values.confirm_password;
 };

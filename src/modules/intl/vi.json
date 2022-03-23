@@ -8,5 +8,8 @@
   "passwordRequire": "Vui lòng nhập mật khẩu",
   "minPasswordInvalid": "Mật khẩu tối thiểu 6 ký tự",
   "register": "Đăng nhập",
-  "Invalid email or password.": "Tài khoản hoặc mật khẩu không đúng."
+  "Invalid email or password.": "Tài khoản hoặc mật khẩu không đúng.",
+  "fisrtNameRequire": "Tên không được để trống",
+  "lastNameRequire": "Họ không được để trống",
+  "paymentTypeRequire": "Type không được để trống"
 }

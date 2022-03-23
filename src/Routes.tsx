@@ -10,7 +10,7 @@ const ProductPage = lazy(() => import('./modules/home/pages/products/ProductPage
 const DetailProductPage = lazy(() => import('./modules/home/pages/products/DetailProductPage'));
 const CreateProductPage = lazy(() => import('./modules/home/pages/products/CreateProductPage'));
 const DashboardPage = lazy(() => import('./modules/home/pages/DashboardPage'));
-
+const DetailUserPage = lazy(() => import('./modules/home/pages/users/UserDetailPage'));
 interface Props {}
 
 export const Routes = (props: Props) => {
@@ -26,6 +26,8 @@ export const Routes = (props: Props) => {
         <Route path={ROUTES.detailProduct + '/:id'} component={DetailProductPage} />
         <Route path={ROUTES.home} component={HomePage} />
         <Route path={ROUTES.contact} component={ContactPage} />
+        <Route path={ROUTES.createUser} component={DetailUserPage} />
+        <Route path={ROUTES.detailUser + '/:id'} component={DetailUserPage} />
 
         <Route path="/" component={LoginPage} />
       </Switch>

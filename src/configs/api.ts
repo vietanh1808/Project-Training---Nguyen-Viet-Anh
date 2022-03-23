@@ -5,7 +5,7 @@ enum APIService {
   public,
   admin,
   vendor,
-  api
+  api,
 }
 
 function getBaseUrl(service: APIService) {
@@ -32,7 +32,7 @@ export const API_PATHS = {
   commonRole: `${getBaseUrl(APIService.admin)}/commons/role`,
   commonCountry: `${getBaseUrl(APIService.admin)}/commons/country`,
   userList: `${getBaseUrl(APIService.admin)}/users/list`,
-  userDelete: `${getBaseUrl(APIService.admin)}/users/delete`,
+  userDelete: `${getBaseUrl(APIService.admin)}/users/edit`,
   userCreate: `${getBaseUrl(APIService.admin)}/users/create`,
   userEdit: `${getBaseUrl(APIService.admin)}/users/edit`,
   productDetail: `${getBaseUrl(APIService.admin)}/products/detail`,
