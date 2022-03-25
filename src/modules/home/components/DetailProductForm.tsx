@@ -32,7 +32,7 @@ interface Props {
   setProduct: React.Dispatch<React.SetStateAction<IProductDetail | undefined>>;
 }
 
-const initZone = { id: null, price: null };
+const initZone = { id: '0', price: null };
 const memberships = [
   { id: 0, name: '' },
   { id: 4, name: 'General' },
@@ -69,41 +69,27 @@ const DetailProductForm = (props: Props) => {
     });
   };
 
-  const onRemoveShipping = (index: number) => (e: any) => {
+  const onRemoveShipping = (id: number) => {
     if (formValue?.shipping_to_zones) {
-      const clone = [...formValue.shipping_to_zones];
-      clone.splice(index, 1);
-      setFormValue({ ...formValue, shipping_to_zones: clone });
-    }
-
-    if (product) {
-      const newClone = [...product.shipping];
-      newClone.splice(index, 1);
-      setProduct({ ...product, shipping: newClone });
+      setFormValue({ ...formValue, shipping_to_zones: formValue.shipping_to_zones.filter((s, i) => s.id != id) });
     }
   };
 
-  const onAddShipping = () => {
-    // Update formValue
+  const onAddShipping = useCallback(() => {
     if (zones.id && zones.price) {
       if (formValue?.shipping_to_zones) {
-        const ships = [...formValue.shipping_to_zones];
-        ships.push({ ...zones, id: +zones.id });
-        setFormValue({ ...formValue, shipping_to_zones: ships });
-      } else {
-        const ships = [];
-        ships.push({ ...zones, id: +zones.id });
-        setFormValue({ ...formValue, shipping_to_zones: ships });
+        setFormValue({
+          ...formValue,
+          shipping_to_zones: [...formValue.shipping_to_zones, { ...zones, id: +zones.id }],
+        });
       }
-
-      //  update UI
-      const zone = shippings.find((s) => s.id == zones.id);
-      if (product?.shipping)
-        setProduct({ ...product, shipping: [...product.shipping, { ...zones, zone_name: zone?.name || '' }] });
-
       setZones(initZone);
     }
-  };
+  }, [zones]);
+
+  useEffect(() => {
+    console.log(formValue);
+  }, [formValue.vendor, formValue.vendor_id]);
 
   const onCheckValue = useCallback(() => {
     const validateP = validateProduct(formValue);
@@ -649,15 +635,20 @@ const DetailProductForm = (props: Props) => {
                         value={zones.price || ''}
                       />
                     </InputGroup>
-                    {product?.shipping?.map((ship, index) => (
+                    {formValue.shipping_to_zones.map((ship, index) => (
                       <div className="d-flex flex-row justify-content-start mb-3" key={index}>
                         <Form.Label column sm="2">
-                          {ship.zone_name === 'Continental U.S.' ? 'Everywhere Else' : ship.zone_name}
+                          {shippings.find((s, i) => s.id == ship.id)?.name}
                         </Form.Label>
                         <InputGroup style={{ width: 400 }}>
                           <InputGroup.Text>$</InputGroup.Text>
                           <Form.Control disabled type="number" value={ship.price} />
-                          <Button onClick={onRemoveShipping(index)} variant="danger">
+                          <Button
+                            onClick={(e) => {
+                              onRemoveShipping(ship.id);
+                            }}
+                            variant="danger"
+                          >
                             Remove
                           </Button>
                         </InputGroup>

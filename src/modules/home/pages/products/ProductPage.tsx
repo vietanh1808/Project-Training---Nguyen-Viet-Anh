@@ -143,9 +143,13 @@ const ProductPage = () => {
     updateProduct();
   };
 
-  const handleClickRow = (name: string, id: string) => (e: any) => {
+  const handleClickRow = (name: string, id?: string) => (e: any) => {
     switch (name) {
       case 'rowEnableIcon':
+        // if (products) {
+        //   const item = products.find(p => p.id == id)
+        //   setProducts([...products, {...item, enabled: 1-(+item?.enabled)}])
+        // }
         break;
       case 'rowCheckbox':
       case 'rowDeleteButton':

@@ -18,6 +18,8 @@ import {
   IShipping,
   IProductUpdate,
 } from '../../../../models/product';
+import { replace } from 'connected-react-router';
+import { ROUTES } from '../../../../configs/routes';
 
 const DetailProductPage = () => {
   const dispatch = useDispatch<ThunkDispatch<AppState, null, Action<string>>>();
@@ -106,13 +108,20 @@ const DetailProductPage = () => {
       }
     }
     setLoading(false);
-    if (dataObject.data) fetchDetail(dataObject.data);
+
+    if (dataObject.data) {
+      if (product) {
+        dispatch(replace(ROUTES.manageProduct));
+        return;
+      }
+      fetchDetail(dataObject.data);
+    }
   };
 
   useEffect(() => {
+    fetchDetail();
     fetchCategory();
     fetchVendor();
-    fetchDetail();
     fetchBrand();
     fetchCondition();
     fetchShipping();
