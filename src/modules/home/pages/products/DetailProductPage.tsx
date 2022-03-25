@@ -16,6 +16,7 @@ import {
   IProductDetail,
   IVendor,
   IShipping,
+  IProductUpdate,
 } from '../../../../models/product';
 
 const DetailProductPage = () => {
@@ -60,7 +61,7 @@ const DetailProductPage = () => {
     categoryObject.data.map((category: any) => {
       newCategorys.push({ ...category, id: +category.id, parentId: +category.parentId, pos: +category.pos });
     });
-    setCategorys(newCategorys);
+    if (categoryObject.success) setCategorys(newCategorys);
     setLoading(false);
   };
 
@@ -71,10 +72,10 @@ const DetailProductPage = () => {
     setLoading(false);
   };
 
-  const fetchDetail = async () => {
+  const fetchDetail = async (id?: string) => {
     setLoading(true);
-    const dataObject = await dispatch(fetchThunk(API_PATHS.productDetail, 'post', { id: params.id }));
-    setProduct(dataObject.data);
+    const dataObject = await dispatch(fetchThunk(API_PATHS.productDetail, 'post', { id: id || params.id }));
+    if (dataObject.success) setProduct(dataObject.data);
     setLoading(false);
   };
 
@@ -85,10 +86,28 @@ const DetailProductPage = () => {
     setLoading(false);
   };
 
-  const handleSubmit = () => {
-    // fetch to Update here
-    console.log("Update Product!")
-  }
+  const handleSubmit = async (value: IProductUpdate, images: any) => {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('productDetail', JSON.stringify(value));
+    const dataObject = await dispatch(
+      fetchThunk(API_PATHS.productCreate, 'post', formData, true, 'multipart/form-data'),
+    );
+
+    if (images.length) {
+      for (let i = 0; i < images.length; i++) {
+        const formImages = new FormData();
+        formImages.append('productId', value.id + '');
+        formImages.append('order', value.imagesOrder.length + '');
+        formImages.append('images[]', images[i].file);
+        const imagesObject = await dispatch(
+          fetchThunk(API_PATHS.uploadImage, 'post', formImages, true, 'multipart/form-data'),
+        );
+      }
+    }
+    setLoading(false);
+    if (dataObject.data) fetchDetail(dataObject.data);
+  };
 
   useEffect(() => {
     fetchCategory();
@@ -114,6 +133,7 @@ const DetailProductPage = () => {
           shippings={shipping}
           onLoading={loading}
           onSubmit={handleSubmit}
+          setProduct={setProduct}
         />
       )}
     </div>

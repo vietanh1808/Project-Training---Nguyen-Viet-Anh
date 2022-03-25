@@ -13,7 +13,7 @@ export interface IUsersParams {
   wishlist: string;
 }
 
-export interface IDeleteUserParams {
+export interface IDeleteParams {
   id: string;
   delete: number;
 }

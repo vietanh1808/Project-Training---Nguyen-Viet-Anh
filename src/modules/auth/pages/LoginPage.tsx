@@ -34,7 +34,7 @@ const LoginPage = () => {
 
       if (json?.success) {
         dispatch(setUserInfo({ ...json.user, user_cookie: json.user_cookie }));
-        Cookies.set(ACCESS_TOKEN_KEY, json.user_cookie, { expires: values.rememberMe ? 7 : undefined });
+        Cookies.set(ACCESS_TOKEN_KEY, json.user_cookie, { expires: 7 });
         dispatch(replace(ROUTES.dashboard));
         return;
       }

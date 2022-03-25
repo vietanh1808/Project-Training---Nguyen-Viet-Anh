@@ -1,10 +1,10 @@
 import { ActionType, createCustomAction, getType } from 'typesafe-actions';
-import { IDeleteUserParams, IUsersParams } from '../../../../models/userData';
+import { IDeleteParams, IUsersParams } from '../../../../models/userData';
 
 export interface UsersState {
   data: IUsersParams[];
   recordsTotal: number;
-  deleteData: IDeleteUserParams[];
+  deleteData: IDeleteParams[];
 }
 
 export const setUsersAction = createCustomAction('user/setUsersAction', (data: IUsersParams[]) => ({
@@ -15,7 +15,7 @@ export const setRecordsTotalAction = createCustomAction('user/setRecordsTotal', 
   recordsTotal,
 }));
 
-export const setDeleteUserAction = createCustomAction('user/setDeleteUser', (data: IDeleteUserParams[]) => ({
+export const setDeleteUserAction = createCustomAction('user/setDeleteUser', (data: IDeleteParams[]) => ({
   data,
 }));
 

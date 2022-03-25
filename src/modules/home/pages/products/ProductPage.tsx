@@ -1,72 +1,65 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  Container,
-  Row,
-  Col,
-  Form,
-  Button,
-  Accordion,
-  Dropdown,
-  ButtonGroup,
-  Table,
-  Navbar,
-  Spinner,
-  Pagination,
-} from 'react-bootstrap';
+import { Row, Col, Form, Button, Spinner } from 'react-bootstrap';
 import { BsPower } from 'react-icons/bs';
-import { AiOutlineRotateRight, AiOutlineSmallDash } from 'react-icons/ai';
+import { BsArrowDown, BsArrowUp } from 'react-icons/bs';
 import FormFilter from '../../components/FormFilter';
 import { MdDelete } from 'react-icons/md';
 import '../../scss/products.css';
-import { ICategory, IFormFilter, IProduct } from '../../../../models/product';
+import { ICategory, IFormFilter, IProduct, IVendor } from '../../../../models/product';
 import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { AppState } from '../../../../redux/reducer';
 import { Action } from 'typesafe-actions';
 import { fetchThunk } from '../../../common/redux/thunk';
-import { setProductsAction } from '../redux/productReducer';
-import PageNumber from '../../components/PageNumber';
+import { setProductsAction, setRecordsTotalAction } from '../redux/productReducer';
 import { ROUTES } from '../../../../configs/routes';
 import { formatterPrice } from '../../utils';
 import { API_PATHS } from '../../../../configs/api';
+import ReactPaginate from 'react-paginate';
 
-const numberItem = 5;
 const initFilter: IFormFilter = {
-  keyword: '',
-  category: '',
-  stock: '',
-  name: false,
-  sku: false,
-  description: false,
+  page: 0,
+  count: 0,
+  search: '',
+  stock_status: '',
+  availability: '',
+  sort: '',
+  order_by: 'ASC',
+  search_type: '',
   vendor: '',
-  available: '',
+  category: '',
 };
 
 const ProductPage = () => {
   const dispatch = useDispatch<ThunkDispatch<AppState, null, Action<string>>>();
-  const productsStore = useSelector((state: AppState) => state.products.data);
+  const productsStore = useSelector((state: AppState) => state.products);
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(-1);
-  const [currentItem, setCurrentItem] = useState<IProduct[]>([]);
-  const [numberPage, setNumberPage] = useState(0);
   const [categorys, setCategorys] = useState<ICategory[]>([]);
-  const [direction, setDirection] = useState('ascending');
+  const [direction, setDirection] = useState('ASC');
   const [formFilter, setFormFilter] = useState<IFormFilter>(initFilter);
-  const [listCheckRow, setListCheckRow] = useState<Array<any>>([]);
+  const [formDelete, setFormDelete] = useState<{ id: string; delete: number }[]>([]);
+  const [pagination, setPagination] = useState<{ pageCount: number; itemOffset: number; currentPage: number }>({
+    pageCount: 0,
+    itemOffset: 1,
+    currentPage: 0,
+  });
+  const [numberItem, setNumberItem] = useState(10);
+  const [vendors, setVendors] = useState<IVendor[]>([]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
-    const productObject = await dispatch(fetchThunk('https://api.gearfocus.div4.pgtest.co/api/products/list'));
+    const productObject = await dispatch(
+      fetchThunk(API_PATHS.productList, 'post', { ...formFilter, page: 1, count: numberItem }),
+    );
     dispatch(setProductsAction(productObject.data));
-    const cateObject = await dispatch(fetchThunk('https://api.gearfocus.div4.pgtest.co/api/categories/list'));
-    setCategorys(cateObject.data);
+    dispatch(setRecordsTotalAction(productObject.recordsTotal));
+
     const newProducts: IProduct[] = [];
     productObject.data.map((p: any) => {
       newProducts.push({
         ...p,
-        id: +p.id,
         price: +p.price,
         arrivalDate: +p.arrivalDate,
         enabled: +p.enabled,
@@ -78,268 +71,147 @@ const ProductPage = () => {
       });
     });
     setProducts(newProducts);
-    setCurrentPage(0);
-    setLoading(false);
-  };
 
-  useEffect(() => {
-    fetchProducts();
+    const cateObject = await dispatch(fetchThunk(API_PATHS.categoryList));
+    setCategorys(cateObject.data);
+
+    setFormFilter({ ...formFilter, count: numberItem, page: 1 });
+
+    setLoading(false);
   }, []);
 
-  // --------------- Handle Pagination ---------------
-  useEffect(() => {
-    const item = products.slice(numberItem * currentPage, numberItem * (currentPage + 1));
-    setCurrentItem(item);
-  }, [currentPage]);
+  const onClickPage = (event: any) => {
+    setPagination({ ...pagination, itemOffset: event.selected, currentPage: event.selected });
+  };
 
-  useEffect(() => {
-    setNumberPage(Math.ceil(products.length / numberItem));
-    const item = products.slice(numberItem * currentPage, numberItem * (currentPage + 1));
-    setCurrentItem(item);
-    setCurrentPage(0);
-    setListCheckRow(
-      Array.from({ length: products.length }, (_, i) => {
-        return false;
+  const updateProduct = async (sortName?: string) => {
+    setLoading(true);
+    const dataObject = await dispatch(
+      fetchThunk(API_PATHS.productList, 'post', {
+        ...formFilter,
+        sort: sortName || '',
+        order_by: direction,
+        page: pagination.currentPage + 1,
+        count: numberItem,
       }),
     );
-  }, [products]);
-
-  const onClickPage = (index?: number | null) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    if (index) {
-      setCurrentPage(index);
-      return;
+    if (dataObject.data) {
+      setProducts(dataObject.data);
+      dispatch(setRecordsTotalAction(dataObject.recordsTotal));
+      setFormDelete([]);
+    } else {
+      console.log('Failed: ', dataObject);
     }
-    const len = products.length;
-    switch (e.currentTarget.id) {
-      case 'prev':
-        setCurrentPage((prev) => (prev > 0 ? prev - 1 : prev));
-        return;
-      case 'next':
-        setCurrentPage((prev) => (prev < len - 1 ? prev + 1 : prev));
-        return;
-    }
+    setLoading(false);
   };
-  // --------------- End of Handle Pagination ---------------
 
   const handleChangeForm = (e: any) => {
     switch (e.currentTarget.id) {
       case 'searchInput':
-        setFormFilter({ ...formFilter, keyword: e.target.value });
+        setFormFilter({ ...formFilter, search: e.target.value });
         break;
       case 'categorySelect':
         setFormFilter({ ...formFilter, category: e.target.value });
         break;
       case 'stockSelect':
-        setFormFilter({ ...formFilter, stock: e.target.value });
+        setFormFilter({ ...formFilter, stock_status: e.target.value });
         break;
-      case 'nameCheckbox':
-        setFormFilter({ ...formFilter, name: e.target.checked });
-        break;
-      case 'skuCheckbox':
-        setFormFilter({ ...formFilter, sku: e.target.checked });
-        break;
-      case 'descriptionCheckbox':
-        setFormFilter({ ...formFilter, description: e.target.checked });
+      case 'searchInCheckbox':
+        // eslint-disable-next-line no-case-declarations
+        const type: string = formFilter.search_type;
+        // eslint-disable-next-line no-case-declarations
+        const value: string = e.currentTarget.value;
+        setFormFilter({
+          ...formFilter,
+          search_type: type.includes(value) ? type.replace(value + ',', '') : type + value + ',',
+        });
         break;
       case 'availableSelect':
-        setFormFilter({ ...formFilter, available: e.target.value });
+        setFormFilter({ ...formFilter, availability: e.target.value });
         break;
       case 'vendorInput':
         setFormFilter({ ...formFilter, vendor: e.target.value });
-        break;
-      default:
         break;
     }
   };
 
   const onAddProduct = () => {};
 
-  const handleSearch = (e: any) => {
+  const handleSearch = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
-    if (JSON.stringify(formFilter) === JSON.stringify(initFilter)) {
-      const cloneProducts: IProduct[] = [];
-      let newP: any = {};
-      productsStore.map((p) => {
-        newP = { ...p };
-        cloneProducts.push(newP);
-      });
-      setProducts(cloneProducts);
-      setLoading(false);
-      return;
-    }
-    let filter = null;
-    const filterItem = productsStore.filter((product, index) => {
-      filter = null;
-      if (formFilter.available) {
-        // Search By Availability Select
-        if (!filter) filter = true;
-        if (product.enabled === 1 && 'enable' === formFilter.available) {
-          filter = filter && true;
-        } else if (product.enabled === 0 && 'disable' === formFilter.available) {
-          filter = filter && true;
-        } else {
-          filter = false;
-        }
-      }
-
-      if (formFilter.keyword) {
-        // Search By Keywords Input
-        if (!filter) filter = true;
-
-        if (product.sku.includes(formFilter.keyword.trim())) {
-          // Search by SKU checkbox
-          filter = filter && true;
-        } else if (formFilter.name === true) {
-          if (product.name.includes(formFilter.keyword.trim())) {
-            // Search by name checkbox
-            filter = filter && true;
-          }
-        } else if (formFilter.description === true) {
-          if (product.description.includes(formFilter.keyword.trim())) {
-            // Search by description checkbox
-            filter = filter && true;
-          }
-        } else {
-          filter = false;
-        }
-      }
-
-      if (formFilter.category) {
-        // Search by Category
-        if (!filter) filter = true;
-        if (formFilter.category === product.category) {
-          filter = filter && true;
-        } else {
-          filter = false;
-        }
-      }
-
-      if (formFilter.stock) {
-        // Search by Stock
-        if (!filter) filter = true;
-        if (formFilter.stock === 'in' && product.amount > 0) {
-          filter = filter && true;
-        } else if (formFilter.stock === 'low' && product.amount <= 10) {
-          filter = filter && true;
-        } else if (formFilter.stock === 'out' && product.amount === 0) {
-          filter = filter && true;
-        } else {
-          filter = false;
-        }
-      }
-
-      if (formFilter.vendor) {
-        // Search by Vendor
-        if (!filter) filter = true;
-        if (product.vendor.includes(formFilter.vendor.trim())) {
-          filter = filter && true;
-        } else {
-          filter = false;
-        }
-      }
-      return filter;
-    });
-    setProducts(filterItem);
-    setLoading(false);
+    setPagination({ ...pagination, currentPage: 0 });
+    updateProduct();
   };
 
-  const sortByKey = (key: string) => {
-    setLoading(true);
-    const cloneProducts = Array.from(products);
-    const sortItem = cloneProducts.sort((a: any, b: any) => {
-      const nameA = a[key].toString().toUpperCase() || '';
-      const nameB = b[key].toString().toUpperCase() || '';
-      if (nameA < nameB) {
-        return direction === 'ascending' ? -1 : 1;
-      }
-      if (nameA > nameB) {
-        return direction === 'ascending' ? 1 : -1;
-      }
-      // names must be equal
-      return 0;
-    });
-    setProducts(sortItem);
-    setLoading(false);
-  };
-
-  const handleClickThead = (e: React.MouseEvent<HTMLTableHeaderCellElement, MouseEvent>) => {
-    setDirection((prev) => (prev === 'ascending' ? 'descending' : 'ascending'));
-    switch (e.currentTarget.innerText.toLocaleLowerCase()) {
-      case 'sku':
-        sortByKey('sku');
-        break;
-      case 'name':
-        sortByKey('name');
-        break;
-      case 'category':
-        sortByKey('category');
-        break;
-      case 'price':
-        sortByKey('price');
-        break;
-      case 'in stock':
-        sortByKey('amount');
-        break;
-      case 'vendor':
-        sortByKey('vendor');
-        break;
-      case 'arrival date':
-        sortByKey('arrivalDate');
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleClickRow = (index: number) => (e: any) => {
-    let cloneArray: any = [];
-    if (index) {
-      index = index + currentPage * numberItem;
-    }
-    switch (e.currentTarget.id) {
-      case 'rowCheckbox':
-        if (e.target.checked) {
-          cloneArray = [...listCheckRow];
-          cloneArray.splice(index, 1, true);
-          setListCheckRow(cloneArray);
-        } else {
-          cloneArray = [...listCheckRow];
-          cloneArray.splice(index, 1, false);
-          setListCheckRow(cloneArray);
-        }
-        break;
+  const handleClickRow = (name: string, id: string) => (e: any) => {
+    switch (name) {
       case 'rowEnableIcon':
-        setLoading(true);
-        cloneArray = [...products];
-        cloneArray.splice(index, 1, { ...cloneArray[index], enabled: 1 - cloneArray[index]['enabled'] });
-        setProducts(cloneArray);
-        dispatch(setProductsAction(cloneArray));
-        setLoading(false);
         break;
+      case 'rowCheckbox':
       case 'rowDeleteButton':
-        cloneArray = products.filter((p: any, index: number) => {
-          return !listCheckRow[index];
-        });
-
-        setProducts(cloneArray);
-        dispatch(setProductsAction(cloneArray));
+        // eslint-disable-next-line no-case-declarations
+        const item = formDelete.find((f) => f.id === id);
+        setFormDelete(item ? formDelete.filter((f) => f.id !== id + '') : [...formDelete, { id: id + '', delete: 1 }]);
         break;
       case 'rowCheckAllCheckbox':
-        e.target.checked
-          ? setListCheckRow(
-              Array.from({ length: products.length }, (_, i) => {
-                return true;
-              }),
-            )
-          : setListCheckRow(
-              Array.from({ length: products.length }, (_, i) => {
-                return false;
-              }),
-            );
+        formDelete.length < products.length
+          ? setFormDelete(products.map((p) => ({ id: p.id + '', delete: 1 })))
+          : setFormDelete([]);
         break;
     }
   };
+
+  const fetchVendors = async () => {
+    const data = await dispatch(fetchThunk(API_PATHS.vendorList));
+    setVendors(data.data);
+  };
+
+  const handleChangeSelect = (data: any) => {
+    setFormFilter({ ...formFilter, vendor: data.value });
+  };
+
+  const onClickThead = async (name: string) => {
+    setLoading(true);
+    setDirection((prev) => {
+      if (prev === 'ASC') return 'DESC';
+      else return 'ASC';
+    });
+    const data = await dispatch(
+      // eslint-disable-next-line no-constant-condition
+      fetchThunk(API_PATHS.productList, 'post', { ...formFilter, sort: name, order_by: direction }),
+    );
+    console.log(data);
+    if (data.data) {
+      setProducts(data.data);
+    }
+    // eslint-disable-next-line no-constant-condition
+    setFormFilter({ ...formFilter, sort: name, order_by: direction });
+    setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (formDelete.length) {
+      const dataObject = await dispatch(fetchThunk(API_PATHS.productDelete, 'post', { params: formDelete }));
+      if (dataObject.data) {
+        updateProduct();
+      }
+    }
+  };
+
+  useEffect(() => {
+    updateProduct();
+  }, [pagination.currentPage]);
+
+  useEffect(() => {
+    updateProduct();
+    setPagination({ ...pagination, pageCount: Math.ceil(productsStore.recordsTotal / numberItem) });
+  }, [numberItem, productsStore.recordsTotal]);
+
+  useEffect(() => {
+    fetchProducts();
+    fetchVendors();
+  }, []);
+
   // --------------------- FORM TABLE PRODUCT ---------------------
   return (
     <div style={{ padding: 10, marginBottom: 30 }}>
@@ -353,7 +225,13 @@ const ProductPage = () => {
         </Spinner>
       ) : (
         <>
-          <FormFilter onSearch={handleSearch} categorys={categorys} onChangeItem={handleChangeForm} />
+          <FormFilter
+            onChangeSelect={handleChangeSelect}
+            vendor={vendors}
+            onSearch={handleSearch}
+            categorys={categorys}
+            onChangeItem={handleChangeForm}
+          />
           <Button href={ROUTES.createProduct} onClick={onAddProduct} className=" mt-3 mb-3">
             Add Product
           </Button>
@@ -361,31 +239,68 @@ const ProductPage = () => {
             <thead>
               <tr>
                 <th>
-                  <Form.Check type={'checkbox'} id="rowCheckAllCheckbox" onClick={handleClickRow(-1)} />
+                  <Form.Check type={'checkbox'} onClick={handleClickRow('rowCheckAllCheckbox', '')} />
                 </th>
-                <th onClick={handleClickThead}>SKU</th>
-                <th onClick={handleClickThead}>Name</th>
-                <th onClick={handleClickThead}>Category</th>
-                <th onClick={handleClickThead}>Price</th>
-                <th onClick={handleClickThead}>In stock</th>
-                <th onClick={handleClickThead}>Vendor</th>
-                <th onClick={handleClickThead}>Arrival Date</th>
+                <th onClick={() => onClickThead('sku')}>
+                  SKU{' '}
+                  {formFilter.sort === 'sku' && (
+                    <span> {formFilter.order_by === 'ASC' ? <BsArrowDown /> : <BsArrowUp />} </span>
+                  )}{' '}
+                </th>
+                <th onClick={() => onClickThead('name')}>
+                  Name{' '}
+                  {formFilter.sort === 'name' && (
+                    <span> {formFilter.order_by === 'ASC' ? <BsArrowDown /> : <BsArrowUp />} </span>
+                  )}{' '}
+                </th>
+                <th onClick={() => onClickThead('category')}>
+                  Category{' '}
+                  {formFilter.sort === 'category' && (
+                    <span> {formFilter.order_by === 'ASC' ? <BsArrowDown /> : <BsArrowUp />} </span>
+                  )}{' '}
+                </th>
+                <th onClick={() => onClickThead('price')}>
+                  Price{' '}
+                  {formFilter.sort === 'price' && (
+                    <span> {formFilter.order_by === 'ASC' ? <BsArrowDown /> : <BsArrowUp />} </span>
+                  )}{' '}
+                </th>
+                <th onClick={() => onClickThead('amount')}>
+                  In stock{' '}
+                  {formFilter.sort === 'amount' && (
+                    <span> {formFilter.order_by === 'ASC' ? <BsArrowDown /> : <BsArrowUp />} </span>
+                  )}{' '}
+                </th>
+                <th onClick={() => onClickThead('vendor')}>
+                  Vendor{' '}
+                  {formFilter.sort === 'vendor' && (
+                    <span> {formFilter.order_by === 'ASC' ? <BsArrowDown /> : <BsArrowUp />} </span>
+                  )}{' '}
+                </th>
+                <th onClick={() => onClickThead('arrivalDate')}>
+                  Arrival Date{' '}
+                  {formFilter.sort === 'arrivalDate' && (
+                    <span> {formFilter.order_by === 'ASC' ? <BsArrowDown /> : <BsArrowUp />} </span>
+                  )}{' '}
+                </th>
               </tr>
             </thead>
             <tbody>
-              {currentItem.map((product, index) => (
-                <tr key={product.id}>
+              {products.map((product) => (
+                <tr
+                  style={{ opacity: formDelete.findIndex((f) => f.id === product.id) !== -1 ? 0.5 : 1 }}
+                  key={product.id}
+                >
                   <td>
                     <Form.Check type={'checkbox'}>
                       <Form.Check.Input
-                        id="rowCheckbox"
                         type={'checkbox'}
-                        onChange={handleClickRow(index)}
-                        checked={listCheckRow[index + numberItem * currentPage]}
+                        onChange={handleClickRow('rowCheckbox', product.id)}
+                        checked={[...formDelete].some((f) => f.id === product.id)}
                       />
                       <Form.Check.Label>
                         |{' '}
-                        <a id="rowEnableIcon" href="#" onClick={handleClickRow(index)}>
+                        <a href="#" onClick={handleClickRow('rowEnableIcon', product.id)}>
                           <BsPower color={product.enabled === 1 ? '#72b25b' : ''} />
                         </a>{' '}
                         |
@@ -406,7 +321,11 @@ const ProductPage = () => {
                   </td>
                   <td>{moment(+product.arrivalDate).format('MMM Do, YYYY')}</td>
                   <td>
-                    <Button id="rowDeleteButton" onClick={handleClickRow(index)}>
+                    <Button
+                      onClick={(e) => {
+                        handleClickRow('rowDeleteButton', product.id);
+                      }}
+                    >
                       <MdDelete />
                     </Button>
                   </td>
@@ -415,13 +334,53 @@ const ProductPage = () => {
             </tbody>
           </table>
 
-          <PageNumber numberPage={numberPage} currentPage={currentPage} onClickPage={onClickPage} />
+          <div className="d-flex flex-row align-items-center mb-3 p-1">
+            <ReactPaginate
+              onPageChange={onClickPage}
+              pageRangeDisplayed={1}
+              marginPagesDisplayed={1}
+              pageCount={pagination.pageCount}
+              initialPage={pagination.currentPage}
+              nextLabel=">"
+              previousLabel="<"
+              activeClassName="active"
+              pageClassName="page-item"
+              pageLinkClassName="page-link"
+              previousClassName="page-item"
+              previousLinkClassName="page-link"
+              nextClassName="page-item"
+              nextLinkClassName="page-link"
+              breakLabel="..."
+              breakClassName="page-item"
+              breakLinkClassName="page-link"
+              containerClassName="pagination"
+            />
+            <div style={{ paddingLeft: 10 }}>{productsStore.recordsTotal} items</div>
+            <Form.Select
+              style={{ width: 80, marginRight: 10, marginLeft: 10 }}
+              value={numberItem}
+              onChange={(e) => setNumberItem(+e.currentTarget.value)}
+            >
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="75">75</option>
+              <option value="100">100</option>
+            </Form.Select>
+            <div>per page</div>
+          </div>
         </>
       )}
       <nav className="navbar fixed-bottom " style={{ backgroundColor: '#323259', boxShadow: '0 0 13 0 #b18aff' }}>
         <Row>
           <Col>
-            <Button style={{ marginLeft: 20, backgroundColor: '#f0ad4e', border: '#f0ad4e' }}>Save Changes</Button>
+            <Button
+              disabled={formDelete.length === 0}
+              onClick={handleDelete}
+              style={{ marginLeft: 20, backgroundColor: '#f0ad4e', border: '#f0ad4e' }}
+            >
+              {'Delete Selected'}
+            </Button>
             <Button style={{ marginLeft: 10, backgroundColor: '#f0ad4e', border: '#f0ad4e' }}>Export all: CSV</Button>
           </Col>
         </Row>

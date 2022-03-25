@@ -16,9 +16,8 @@ import { formatterDate, formatterPrice, validateProduct, validSubmitUpdate } fro
 import { BsFillCameraFill, BsXCircleFill, BsFillCalendarFill } from 'react-icons/bs';
 import ImageUploading, { ImageListType } from 'react-images-uploading';
 import Select from 'react-select';
-import SunEditor from 'suneditor-react';
-import 'suneditor/dist/css/suneditor.min.css';
 import { FormattedMessage } from 'react-intl';
+import { Editor } from '@tinymce/tinymce-react';
 
 interface Props {
   product?: IProductDetail;
@@ -28,7 +27,9 @@ interface Props {
   vendors: IVendor[];
   shippings: IShipping[];
   onLoading?: boolean;
-  onSubmit: (values?: IProductUpdate) => void;
+  onSubmit: (values: IProductUpdate, images: any) => void;
+  statusUpdate?: boolean;
+  setProduct: React.Dispatch<React.SetStateAction<IProductDetail | undefined>>;
 }
 
 const initZone = { id: null, price: null };
@@ -50,22 +51,22 @@ const initValidFiled: IProductValidation = {
 };
 
 const DetailProductForm = (props: Props) => {
-  const { product, categories, conditions, brands, vendors, shippings, onSubmit } = props;
+  const { product, categories, conditions, brands, vendors, shippings, onSubmit, statusUpdate, setProduct } = props;
   const [images, setImages] = useState<any[]>([]);
-  const [myProduct, setMyProduct] = useState<IProductDetail | undefined>(product);
   const [zones, setZones] = useState<any>(initZone);
   const [optionsVendor, setOptionsVendor] = useState<any[]>([]);
   const [formValue, setFormValue] = useState<IProductUpdate>(initProduct);
   const [validate, setValidate] = React.useState<IProductValidation>(initValidFiled);
+  const editorRef = useRef<any>(null);
 
   const onUploadImg = (imageList: ImageListType, addUpdateIndex: number[] | undefined) => {
     // data for submit
-    const cloneImgs = imageList.map((img) => {
-      const a = { ...img };
-      return a;
-    });
-    const imgsCheck = cloneImgs.filter((img) => !images.includes(img));
+    const imgsCheck = imageList.filter((img) => !images.includes(img));
     setImages(imgsCheck);
+    setFormValue({
+      ...formValue,
+      imagesOrder: [...formValue.imagesOrder, imgsCheck.map((img) => img.file?.name)],
+    });
   };
 
   const onRemoveShipping = (index: number) => (e: any) => {
@@ -75,10 +76,10 @@ const DetailProductForm = (props: Props) => {
       setFormValue({ ...formValue, shipping_to_zones: clone });
     }
 
-    if (myProduct) {
-      const newClone = [...myProduct.shipping];
+    if (product) {
+      const newClone = [...product.shipping];
       newClone.splice(index, 1);
-      setMyProduct({ ...myProduct, shipping: newClone });
+      setProduct({ ...product, shipping: newClone });
     }
   };
 
@@ -97,39 +98,41 @@ const DetailProductForm = (props: Props) => {
 
       //  update UI
       const zone = shippings.find((s) => s.id == zones.id);
-      if (myProduct?.shipping)
-        setMyProduct({ ...myProduct, shipping: [...myProduct.shipping, { ...zones, zone_name: zone?.name || '' }] });
+      if (product?.shipping)
+        setProduct({ ...product, shipping: [...product.shipping, { ...zones, zone_name: zone?.name || '' }] });
 
       setZones(initZone);
     }
   };
 
   const onCheckValue = useCallback(() => {
-    console.log(formValue);
     const validateP = validateProduct(formValue);
     setValidate(validateP);
 
     if (!validSubmitUpdate(validateP)) {
       return;
     }
+    if (formValue) onSubmit(formValue, images);
+  }, [formValue, onSubmit, images]);
 
-    onSubmit(formValue);
-  }, [formValue, onSubmit]);
-
-  const handleChangeDescription = (content: string) => {
-    if (formValue?.description) setFormValue({ ...formValue, description: content });
+  const handleDeleteImg = (index: any) => {
+    setFormValue({
+      ...formValue,
+      deleted_images: [...formValue.deleted_images, product?.images[index].id],
+      imagesOrder: formValue.imagesOrder.filter((img, i) => i !== index),
+      images: formValue.images.filter((img, i) => i !== index),
+    });
   };
 
   useEffect(() => {
     if (product) {
-      setMyProduct(product);
       setFormValue({
         ...product,
         vendor_id: +product.vendor_id,
         brand_id: +product.brand_id,
         condition_id: null,
         deleted_images: [],
-        categories: product.categories.map((cate) => ({ ...cate, value: cate.name, label: cate.name })),
+        categories: product.categories?.map((cate) => ({ ...cate, value: cate.name, label: cate.name })),
         sale_price_type: +product.sale_price_type,
         tax_exempt: +product.tax_exempt,
         price: +product.price,
@@ -140,29 +143,31 @@ const DetailProductForm = (props: Props) => {
         enabled: +product.enabled,
         participate_sale: +product.participate_sale,
         sale_price: +product.sale_price,
-        og_tags_type: +product.og_tags_type,
-        meta_desc_type: +product.meta_desc_type,
+        og_tags_type: product.og_tags_type + '',
+        meta_desc_type: product.meta_desc_type + '',
         enableOffers: -1,
         minimum_offer_price: -1,
-        vendor: '',
-        shipping_to_zones: [],
-        imagesOrder: [],
+        vendor: vendors.find((v) => v.id === product.vendor_id)?.name || '',
+        shipping_to_zones: [...product.shipping],
+        imagesOrder: [...product.images],
       });
     } else {
-      setMyProduct({
+      setProduct({
         ...initProduct,
         sort_description: '',
         code: '',
         weight: 0,
         cleanURL: '',
-        shipping: [{ id: 0, zone_name: '', price: 0 }],
-        images: [{ id: 0, thumbs: [''], file: '' }],
+        shipping: [],
+        images: [],
+        og_tags_type: '0',
+        meta_desc_type: 'A',
       });
     }
   }, [product]);
 
   useEffect(() => {
-    setOptionsVendor(vendors.map((v) => ({ vendor_id: +v.id, label: v.name, value: v.name, name: v.name })));
+    setOptionsVendor(vendors?.map((v) => ({ vendor_id: +v.id, label: v.name, value: v.name, name: v.name })));
   }, [vendors]);
 
   return (
@@ -219,7 +224,6 @@ const DetailProductForm = (props: Props) => {
                       onChange={(e) => {
                         if (formValue) setFormValue({ ...formValue, name: e.currentTarget.value });
                       }}
-                      defaultValue={product?.name}
                     />
                     {!!validate.name && (
                       <small className="text-danger">
@@ -241,7 +245,7 @@ const DetailProductForm = (props: Props) => {
                       }}
                       value={brands.find((b) => b.id == formValue?.brand_id)?.id}
                     >
-                      {brands.map((brand, index) => (
+                      {brands?.map((brand, index) => (
                         <option value={brand.id} key={index}>
                           {brand.name}
                         </option>
@@ -267,7 +271,7 @@ const DetailProductForm = (props: Props) => {
                         if (formValue) setFormValue({ ...formValue, condition_id: +e.currentTarget.value });
                       }}
                     >
-                      {conditions.map((condition, index) => (
+                      {conditions?.map((condition, index) => (
                         <option value={condition.id || ''} key={index}>
                           {condition.name === 'None' ? '' : condition.name}
                         </option>
@@ -292,7 +296,6 @@ const DetailProductForm = (props: Props) => {
                         if (formValue) setFormValue({ ...formValue, sku: e.currentTarget.value });
                       }}
                       value={formValue?.sku || ''}
-                      defaultValue={product?.sku}
                     />
                     {!!validate?.sku && (
                       <small className="text-danger">
@@ -310,28 +313,16 @@ const DetailProductForm = (props: Props) => {
                   <Col sm="10">
                     <ImageUploading multiple value={images} onChange={onUploadImg} maxNumber={maxNumber}>
                       {({ imageList, onImageUpload, onImageRemove, dragProps }) => (
-                        // write your building UI
                         <div className=" d-flex flex-row flex-wrap">
-                          {myProduct?.images.map((image, index) => (
+                          {formValue?.images.map((image, index) => (
                             <div className="" key={index}>
                               <img src={image.thumbs[0]} style={{ width: 100, height: 100, marginLeft: 10 }} />
-                              <button
-                                style={{ border: 'none' }}
+                              <BsXCircleFill
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  const imgs = [...myProduct.images];
-                                  imgs.splice(index, 1);
-                                  setMyProduct({ ...myProduct, images: imgs });
-                                  if (formValue?.deleted_images)
-                                    setFormValue({
-                                      ...formValue,
-                                      deleted_images: [...formValue.deleted_images, product?.images[index]],
-                                      imagesOrder: [...images, ...imgs],
-                                    });
+                                  handleDeleteImg(index);
                                 }}
-                              >
-                                <BsXCircleFill />
-                              </button>
+                              />
                             </div>
                           ))}
                           <div className="d-flex flex-row-reverse flex-wrap ">
@@ -345,7 +336,7 @@ const DetailProductForm = (props: Props) => {
                             >
                               <BsFillCameraFill size={50} />
                             </button>
-                            {imageList.map((image, index) => (
+                            {imageList?.map((image, index) => (
                               <div key={index}>
                                 <img src={image.dataURL} style={{ width: 100, height: 100, marginLeft: 10 }} />
                                 <button
@@ -380,7 +371,11 @@ const DetailProductForm = (props: Props) => {
                     <Select
                       value={formValue?.categories}
                       isMulti
-                      options={categories.map((cate) => ({ value: cate.name, label: cate.name, category_id: cate.id }))}
+                      options={categories?.map((cate) => ({
+                        value: cate.name,
+                        label: cate.name,
+                        category_id: cate.id,
+                      }))}
                       className="basic-multi-select"
                       placeholder="Select Category"
                       onChange={(data) => {
@@ -409,7 +404,34 @@ const DetailProductForm = (props: Props) => {
                     Description <span className="text-danger">*</span>
                   </Form.Label>
                   <Col style={{ zIndex: 1 }} sm="10">
-                    <SunEditor setContents={formValue?.description} onChange={handleChangeDescription} />
+                    <Editor
+                      onInit={(evt, editor) => (editorRef.current = editor)}
+                      apiKey="gry76qkhbwulfhlezb9s84a77js17v85b3xolv8c78bqfivb"
+                      onChange={(e: any) => {
+                        try {
+                          setFormValue({ ...formValue, description: e.lastLevel.content });
+                          setValidate({ ...validate, description: '' });
+                        } catch (error) {
+                          setValidate({ ...validate, description: 'typeAgain' });
+                        }
+                      }}
+                      initialValue={formValue.description}
+                      init={{
+                        height: 200,
+                        menubar: false,
+                        plugins: [
+                          'advlist autolink lists link image charmap print preview anchor',
+                          'searchreplace visualblocks code fullscreen',
+                          'insertdatetime media table paste code help wordcount',
+                        ],
+                        toolbar:
+                          'undo redo | formatselect | ' +
+                          'bold italic backcolor | alignleft aligncenter ' +
+                          'alignright alignjustify | bullist numlist outdent indent | ' +
+                          'removeformat | help',
+                        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                      }}
+                    />
                     {!!validate.description && (
                       <small className="text-danger">
                         <FormattedMessage id={validate.description} />
@@ -429,7 +451,9 @@ const DetailProductForm = (props: Props) => {
                       label={formValue?.enabled === 1 ? 'Yes' : 'No'}
                       checked={formValue?.enabled === 1}
                       onChange={() => {
-                        if (formValue?.enabled) setFormValue({ ...formValue, enabled: 1 - formValue.enabled });
+                        if (typeof formValue?.enabled === 'number') {
+                          setFormValue({ ...formValue, enabled: 1 - formValue.enabled });
+                        }
                       }}
                     />
                     {!!validate.enabled && (
@@ -461,7 +485,7 @@ const DetailProductForm = (props: Props) => {
                       }}
                       defaultValue={''}
                     >
-                      {memberships.map((mem, index) => (
+                      {memberships?.map((mem, index) => (
                         <option value={mem.id} key={index}>
                           {' '}
                           {mem.name}{' '}
@@ -625,7 +649,7 @@ const DetailProductForm = (props: Props) => {
                         value={zones.price || ''}
                       />
                     </InputGroup>
-                    {myProduct?.shipping.map((ship, index) => (
+                    {product?.shipping?.map((ship, index) => (
                       <div className="d-flex flex-row justify-content-start mb-3" key={index}>
                         <Form.Label column sm="2">
                           {ship.zone_name === 'Continental U.S.' ? 'Everywhere Else' : ship.zone_name}
@@ -646,7 +670,7 @@ const DetailProductForm = (props: Props) => {
                         }}
                         style={{ width: 400 }}
                       >
-                        {shippings.map((shipping, index) => (
+                        {shippings?.map((shipping, index) => (
                           <option value={shipping.id + ''} key={index}>
                             {shipping.name}
                           </option>
@@ -680,17 +704,16 @@ const DetailProductForm = (props: Props) => {
                   <Col sm="10" className="">
                     <Form.Select
                       onChange={(e) => {
-                        if (typeof formValue?.og_tags_type === 'number')
-                          setFormValue({ ...formValue, og_tags_type: +e.currentTarget.value });
-                        else setFormValue({ ...formValue, og_tags_type: 0 });
+                        setFormValue({ ...formValue, og_tags_type: e.currentTarget.value });
                       }}
                       className="mb-3"
+                      defaultValue={formValue.og_tags_type}
                     >
-                      <option value="">Autogeneration</option>
-                      <option value={myProduct?.og_tags}>Custom</option>
+                      <option value="0">Autogeneration</option>
+                      <option value={'1'}>Custom</option>
                     </Form.Select>
                     <Form.Control
-                      hidden={formValue?.og_tags_type === 0}
+                      hidden={formValue?.og_tags_type === '0'}
                       onChange={(e) => {
                         if (formValue) setFormValue({ ...formValue, og_tags: e.currentTarget.value });
                       }}
@@ -712,17 +735,16 @@ const DetailProductForm = (props: Props) => {
                   <Col sm="10" className="">
                     <Form.Select
                       onChange={(e) => {
-                        if (typeof formValue?.meta_desc_type === 'number')
-                          setFormValue({ ...formValue, meta_desc_type: +e.currentTarget.value });
-                        else setFormValue({ ...formValue, meta_desc_type: 0 });
+                        setFormValue({ ...formValue, meta_desc_type: e.currentTarget.value });
                       }}
+                      defaultValue={formValue.meta_desc_type}
                       className="mb-3"
                     >
-                      <option value="">Autogeneration</option>
-                      <option value={myProduct?.meta_description}>Custom</option>
+                      <option value="A">Autogeneration</option>
+                      <option value="C">Custom</option>
                     </Form.Select>
                     <Form.Control
-                      hidden={formValue?.meta_desc_type === 0}
+                      hidden={formValue?.meta_desc_type === 'A'}
                       onChange={(e) => {
                         if (formValue) setFormValue({ ...formValue, meta_description: e.currentTarget.value });
                       }}
@@ -736,6 +758,7 @@ const DetailProductForm = (props: Props) => {
                     )}
                   </Col>
                 </Form.Group>
+
                 {/* Meta keywords */}
                 <Form.Group as={Row} className="mb-3">
                   <Form.Label column sm="2">
@@ -867,4 +890,4 @@ const DetailProductForm = (props: Props) => {
   );
 };
 
-export default memo(DetailProductForm);
+export default DetailProductForm;

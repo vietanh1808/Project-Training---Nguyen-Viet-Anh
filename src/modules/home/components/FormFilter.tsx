@@ -2,16 +2,19 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Collapse } from 'react-bootstrap';
 import { BsPower, BsArrowDown, BsArrowUp } from 'react-icons/bs';
 import { AiOutlineRotateRight, AiOutlineSmallDash } from 'react-icons/ai';
-import { ICategory } from '../../../models/product';
+import { ICategory, IVendor } from '../../../models/product';
+import Select from 'react-select';
 
 interface Props {
   categorys: ICategory[];
   onSearch?: (e?: any) => void;
   onChangeItem?: (item: any) => void;
+  vendor: IVendor[];
+  onChangeSelect: (data: any) => void;
 }
 
 const FormFilter = (props: Props) => {
-  const { categorys, onSearch, onChangeItem } = props;
+  const { categorys, onSearch, onChangeItem, vendor, onChangeSelect } = props;
   const [expand, setExpand] = useState(false);
   const handleExpand = () => {
     setExpand(!expand);
@@ -25,9 +28,9 @@ const FormFilter = (props: Props) => {
           </Col>
           <Col className="m-1" sm={2}>
             <Form.Select id="categorySelect" onChange={onChangeItem}>
-              <option value={''}>Any Category</option>
+              <option value={'0'}>Any Category</option>
               {categorys.map((cate, index) => (
-                <option value={cate.name} key={index}>
+                <option value={cate.id} key={index}>
                   {cate.name}
                 </option>
               ))}
@@ -56,10 +59,16 @@ const FormFilter = (props: Props) => {
               <Form.Group>
                 <Form.Label>Search in:</Form.Label>
                 <Col>
-                  <Form.Check id="nameCheckbox" onChange={onChangeItem} type="checkbox" label="Name" value={'name'} />
-                  <Form.Check id="skuCheckbox" onChange={onChangeItem} type="checkbox" label="SKU" value={'checkbox'} />
                   <Form.Check
-                    id="descriptionCheckbox"
+                    id="searchInCheckbox"
+                    onChange={onChangeItem}
+                    type="checkbox"
+                    label="Name"
+                    value={'name'}
+                  />
+                  <Form.Check id="searchInCheckbox" onChange={onChangeItem} type="checkbox" label="SKU" value={'sku'} />
+                  <Form.Check
+                    id="searchInCheckbox"
                     onChange={onChangeItem}
                     type="checkbox"
                     label="Full description"
@@ -72,16 +81,20 @@ const FormFilter = (props: Props) => {
               <Form.Group>
                 <Form.Label>Availability</Form.Label>
                 <Form.Select id="availableSelect" onChange={onChangeItem} defaultValue="Choose...">
-                  <option value={''}>Any Available Status</option>
-                  <option value={'enable'}>Only Enable</option>
-                  <option value={'disable'}>Only Disable</option>
+                  <option value={'all'}>Any Available Status</option>
+                  <option value={'1'}>Only Enable</option>
+                  <option value={'0'}>Only Disable</option>
                 </Form.Select>
               </Form.Group>
             </Col>
             <Col sm={3}>
               <Form.Group>
                 <Form.Label>Vendor</Form.Label>
-                <Form.Control id="vendorInput" onChange={onChangeItem} placeholder=""></Form.Control>
+                <Select
+                  options={vendor.map((v) => ({ label: v.name, value: v.id }))}
+                  onChange={onChangeSelect}
+                  isSearchable
+                />
               </Form.Group>
             </Col>
           </Row>

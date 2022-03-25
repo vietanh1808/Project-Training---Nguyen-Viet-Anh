@@ -13,11 +13,10 @@ export function fetchThunk(
   contentType?: string,
 ): ThunkAction<Promise<any>, AppState, null, Action<string>> {
   return async (dispatch, getState) => {
-
     const res = await fetch(url, {
       credentials: 'include',
       method,
-      body: typeof body === 'object' ? JSON.stringify(body) : body,
+      body: !contentType ? (typeof body === 'object' ? JSON.stringify(body) : body) : (body as any),
       headers:
         contentType !== 'multipart/form-data'
           ? {
@@ -25,8 +24,8 @@ export function fetchThunk(
               Authorization: Cookies.get(ACCESS_TOKEN_KEY) || '',
             }
           : {
-            Authorization: Cookies.get(ACCESS_TOKEN_KEY) || ''
-          },
+              Authorization: Cookies.get(ACCESS_TOKEN_KEY) || '',
+            },
       cache: 'no-store',
     });
 

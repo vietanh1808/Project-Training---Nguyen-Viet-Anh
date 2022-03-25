@@ -13,7 +13,7 @@ import PageNumber from '../../components/PageNumber';
 import { ROUTES } from '../../../../configs/routes';
 import { API_PATHS } from '../../../../configs/api';
 import { setDeleteUserAction, setRecordsTotalAction, setUsersAction } from '../redux/userReducer';
-import { ICountryParams, IFormFilterUser, IUsersParams, IDeleteUserParams } from '../../../../models/userData';
+import { ICountryParams, IFormFilterUser, IUsersParams, IDeleteParams } from '../../../../models/userData';
 import { idSearchForm, titleTable } from '../../contants';
 import { formatterDate } from '../../utils';
 import ReactPaginate from 'react-paginate';
@@ -40,7 +40,6 @@ const UserPage = () => {
   const usersStore = useSelector((state: AppState) => state.users);
   const [loading, setLoading] = useState(false);
   const [sortby, setSortby] = useState('ASC');
-  const [listCheckRow, setListCheckRow] = useState<Array<any>>([]);
   const [myUsers, setMyUsers] = useState<IUsersParams[]>([]);
   const [country, setCountry] = useState<ICountryParams[]>([]);
   const [formFilter, setFormFilter] = useState<IFormFilterUser>(initFilter);
@@ -49,9 +48,9 @@ const UserPage = () => {
     itemOffset: 1,
     currentPage: 0,
   });
-  const [deleteData, setDeleteData] = useState<IDeleteUserParams[]>([]);
-  const [showModals, setShowModals] = useState<{ delete: boolean }>({ delete: false });
   const [numberItem, setNumberItem] = useState(10);
+  const [deleteData, setDeleteData] = useState<IDeleteParams[]>([]);
+  const [showModals, setShowModals] = useState<{ delete: boolean }>({ delete: false });
 
   const updateUser = async (sortName?: string) => {
     setLoading(true);
@@ -66,7 +65,10 @@ const UserPage = () => {
     );
     setMyUsers(userObject.data);
     setLoading(false);
-    setSortby((prev) => (prev === 'ASC' ? 'DESC' : 'ASC'));
+    setSortby((prev) => {
+      if (prev === 'ASC') return 'DESC';
+      else return 'ASC';
+    });
   };
 
   const onClickPage = (event: any) => {
@@ -169,14 +171,6 @@ const UserPage = () => {
     setShowModals({ ...showModals, delete: !showModals.delete });
     fetchUser();
   };
-
-  useEffect(() => {
-    setListCheckRow(
-      Array.from({ length: myUsers.length }, (_, i) => {
-        return false;
-      }),
-    );
-  }, [myUsers]);
 
   useEffect(() => {
     fetchUser();

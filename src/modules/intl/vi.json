@@ -11,5 +11,16 @@
   "Invalid email or password.": "Tài khoản hoặc mật khẩu không đúng.",
   "fisrtNameRequire": "Tên không được để trống",
   "lastNameRequire": "Họ không được để trống",
-  "paymentTypeRequire": "Type không được để trống"
+  "paymentTypeRequire": "Type không được để trống",
+  "nameRequire": "Tên không được để trống",
+  "vendorRequire": "Tên người dùng không được để trống",
+  "images": "Ảnh không được để trống",
+  "categories": "Danh mục không được để trống",
+  "shipping": "Nhà cung cấp không được để trống",
+  "priceRequire":"Giá không được để trống",
+  "quantityRequire": "Số lượng không được để trống",
+  "brandRequire": "Nhãn hiệu không được để trống",
+  "conditionRequire": "Điều kiện không được để trống",
+  "typeAgain":"Nhập lại lần nữa",
+  "imagesRequire":"Ảnh không được để trống"
 }

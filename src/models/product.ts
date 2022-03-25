@@ -1,5 +1,5 @@
 export interface IProduct {
-  id: number;
+  id: string;
   sku: string;
   name: string;
   category: string;
@@ -15,7 +15,6 @@ export interface IProduct {
   participateSale: number;
   condition: string;
 }
-
 export interface ICategory {
   id: number;
   parentId: number;
@@ -24,14 +23,16 @@ export interface ICategory {
   pos: number;
 }
 export interface IFormFilter {
-  keyword: string;
+  page: number;
+  count: number;
+  search: string;
+  stock_status: string;
+  availability: string;
+  sort: string;
+  order_by: string;
+  search_type: string;
   category: string;
-  stock: string | 'in' | 'low' | 'out';
-  name: boolean;
-  sku: boolean;
-  description: boolean;
   vendor: string;
-  available: string | 'enable' | 'disable';
 }
 
 export interface IBrand {
@@ -62,8 +63,8 @@ export interface IProductDetail {
   arrival_date: number;
   facebook_marketing_enabled: number;
   google_feed_enabled: number;
-  og_tags_type: number;
-  meta_desc_type: number;
+  og_tags_type: string;
+  meta_desc_type: string;
   meta_keywords: string;
   meta_description: string;
   product_page_title: string;
@@ -119,11 +120,11 @@ export interface IProductUpdate {
   sku: string;
   participate_sale: number;
   sale_price: number;
-  og_tags_type: number;
+  og_tags_type: string;
   og_tags: string;
   enableOffers: number;
   minimum_offer_price: number;
-  meta_desc_type: number;
+  meta_desc_type: string;
   meta_description: string;
   meta_keywords: string;
   product_page_title: string;
@@ -132,6 +133,11 @@ export interface IProductUpdate {
   imagesOrder: Array<any>;
   id: number;
   deleted_images: Array<any>;
+  images: Array<{
+    id: number;
+    file: string;
+    thumbs: Array<string>;
+  }>;
 }
 
 export interface IProductValidation {
@@ -165,7 +171,6 @@ export interface IProductValidation {
   brand_id: string;
   condition_id?: string;
 }
-
 export const initProduct: IProductUpdate = {
   vendor_id: 0,
   vendor: '',
@@ -186,11 +191,11 @@ export const initProduct: IProductUpdate = {
   sku: '',
   participate_sale: 0,
   sale_price: 0,
-  og_tags_type: 0,
+  og_tags_type: '0',
   og_tags: '',
   enableOffers: 0,
   minimum_offer_price: 0,
-  meta_desc_type: 0,
+  meta_desc_type: 'A',
   meta_description: '',
   meta_keywords: '',
   product_page_title: '',
@@ -199,4 +204,5 @@ export const initProduct: IProductUpdate = {
   imagesOrder: [],
   id: 0,
   deleted_images: [],
+  images: [],
 };

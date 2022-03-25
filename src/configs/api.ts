@@ -37,9 +37,10 @@ export const API_PATHS = {
   userEdit: `${getBaseUrl(APIService.admin)}/users/edit`,
   productDetail: `${getBaseUrl(APIService.admin)}/products/detail`,
   productCreate: `${getBaseUrl(APIService.admin)}/products/create`,
-  productEdit: `${getBaseUrl(APIService.admin)}/products/edit`,
+  productDelete: `${getBaseUrl(APIService.admin)}/products/edit`,
   conditionList: `${getBaseUrl(APIService.admin)}/conditions/list`,
   shippingList: `${getBaseUrl(APIService.admin)}/shipping/list`,
   productList: `${getBaseUrl(APIService.api)}/products/list`,
   categoryList: `${getBaseUrl(APIService.api)}/categories/list`,
+  uploadImage: `${getBaseUrl(APIService.api)}/products/upload-image`,
 };

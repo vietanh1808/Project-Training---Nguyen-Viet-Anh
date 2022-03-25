@@ -18,16 +18,12 @@ import '../scss/dashboard.css';
 import ProductPage from '../pages/products/ProductPage';
 import UserPage from '../pages/users/UserPage';
 import { BsJustify, BsFillPeopleFill, BsFillTagsFill } from 'react-icons/bs';
+import { ROUTES } from '../../../configs/routes';
 
 interface Props {
   show?: boolean;
   onClick?: () => void;
 }
-interface CustomeProps {
-  children: any;
-  eventKey: any;
-}
-
 const SideBar = (props: Props) => {
   const [active, setActive] = useState(false);
 
@@ -39,7 +35,7 @@ const SideBar = (props: Props) => {
 
   return (
     <>
-      <Tab.Container id="left-tabs-example" defaultActiveKey="second">
+      <Tab.Container id="left-tabs-example" defaultActiveKey="manageProduct">
         <Row>
           <Col sm={show ? 3 : 1}>
             <Collapse in={show}>
@@ -51,8 +47,7 @@ const SideBar = (props: Props) => {
                         <BsFillTagsFill /> Catalog
                       </Accordion.Header>
                       <Accordion.Body>
-                        <Nav.Link eventKey="first">Product</Nav.Link>
-                        <Nav.Link eventKey="third">Product tabs</Nav.Link>
+                        <Nav.Link eventKey="manageProduct">Product</Nav.Link>
                       </Accordion.Body>
                     </Accordion.Item>
                   </Nav.Item>
@@ -62,7 +57,7 @@ const SideBar = (props: Props) => {
                         <BsFillPeopleFill /> User
                       </Accordion.Header>
                       <Accordion.Body>
-                        <Nav.Link eventKey="second">User List</Nav.Link>
+                        <Nav.Link eventKey="manageUser">User List</Nav.Link>
                       </Accordion.Body>
                     </Accordion.Item>
                   </Nav.Item>
@@ -72,10 +67,10 @@ const SideBar = (props: Props) => {
           </Col>
           <Col>
             <Tab.Content>
-              <Tab.Pane eventKey="first">
+              <Tab.Pane eventKey="manageProduct">
                 <ProductPage />
               </Tab.Pane>
-              <Tab.Pane eventKey="second">
+              <Tab.Pane eventKey="manageUser">
                 <UserPage />
               </Tab.Pane>
             </Tab.Content>

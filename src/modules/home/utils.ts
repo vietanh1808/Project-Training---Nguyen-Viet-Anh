@@ -44,9 +44,9 @@ const validStringFiled = (name: string, value?: string) => {
   }
 };
 
-const validArrayField = (name: string, value: any[]) => {
-  if (value.length) {
-    return '';
+const validArrayField = (name: string, value?: any[]) => {
+  if (value) {
+    if (value.length) return '';
   }
   switch (name) {
     case 'images':
@@ -60,7 +60,7 @@ const validArrayField = (name: string, value: any[]) => {
   }
 };
 
-const validNumberFiled = (name: string, value: number) => {
+const validNumberFiled = (name: string, value?: number) => {
   if (value) {
     return '';
   }
@@ -69,10 +69,8 @@ const validNumberFiled = (name: string, value: number) => {
       return 'priceRequire';
     case 'quantity':
       return 'quantityRequire';
-    case 'vendor':
-      return 'quantityRequire';
     case 'brand':
-      return 'quantityRequire';
+      return 'brandRequire';
     case 'condition':
       return 'conditionRequire';
     default:
@@ -87,16 +85,16 @@ const validateConfirmPassword = (pass: string, rePass: string) => {
 
 export const validateProduct = (product?: IProductUpdate): IProductValidation => {
   return {
-    vendor_id: validNumberFiled('vendor', product?.vendor_id || 0),
-    brand_id: validNumberFiled('brand', product?.brand_id || 0),
-    quantity: validNumberFiled('quantity', product?.quantity || 0),
-    price: validNumberFiled('price', product?.price || 0),
+    vendor_id: validNumberFiled('vendor', product?.vendor_id),
+    brand_id: validNumberFiled('brand', product?.brand_id),
+    quantity: validNumberFiled('quantity', product?.quantity),
+    price: validNumberFiled('price', product?.price),
     condition_id: validNumberFiled('conditon', product?.condition_id || 0),
-    name: validStringFiled('name', product?.name || ''),
-    description: validStringFiled('description', product?.description || ''),
-    imagesOrder: validArrayField('images', product?.imagesOrder || []),
-    categories: validArrayField('catgories', product?.categories || []),
-    shipping_to_zones: validArrayField('shipping', product?.shipping_to_zones || []),
+    name: validStringFiled('name', product?.name),
+    description: validStringFiled('description', product?.description),
+    imagesOrder: validArrayField('images', product?.imagesOrder),
+    categories: validArrayField('catgories', product?.categories),
+    shipping_to_zones: validArrayField('shipping', product?.shipping_to_zones),
   };
 };
 
